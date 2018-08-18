@@ -8,7 +8,7 @@ import re
 import sqlite3
 import datetime
 from _datetime import timedelta
-#from asn1crypto.core import Integer
+from asn1crypto.core import Integer
 
 DEBUG_LEVEL = 0
 
@@ -120,9 +120,10 @@ class lesson:
         day_text_accumulator = ""
         for day_N in range(1, 8):
         #for day_N in range(1, 3):
-            print("day {0} add to array of {1}".format(day_N, len(self.days)))
+            #print("day {0} add to array of {1}".format(day_N, len(self.days)))
+            print("lesson {0} day {1}".format(self.lesson_N, day_N))
             curr_day = day(day_N)
-            print("day date is {0}".format(curr_day.day_data))
+            #print("day date is {0}".format(curr_day.day_data))
             self.days.append(curr_day)
             self.days[-1].get_content(self.lesson_full_path, day_N)
             #self.days[-1].content = "<p> {0} : {1}</p> {2}".format(str(self.lesson_start + timedelta(day_N-1)), self.days[-1].title, self.days[-1].content)
@@ -509,7 +510,7 @@ def adventech_ref_to_MyBible_ref(doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("MyBible ref: {0}".format(MyBible_ref))
         MyBible_a_tag = doc.new_tag("a", href=MyBible_ref)
-        MyBible_a_tag.insert(0, "{0}.{1}".format(book_name, numeric_part))
+        MyBible_a_tag.insert(0, "{0}.{1} ".format(book_name, numeric_part))
         inp_tag.insert_after(MyBible_a_tag)
     inp_tag.decompose()
 
@@ -604,6 +605,7 @@ if __name__ == '__main__':
     devotions.create_db()
     #devotions.get_quarter()
     #devotions.quarter.print_quarter()
+    print ("-- get content --")
     devotions.SS_year_inst.get_content()
     print ("-- create_table_info --")
     devotions.create_table_info()
