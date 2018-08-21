@@ -46,10 +46,10 @@ class day:
         self.day_N = day_N
         request_str = ("{0}/days/{1:02}/read/index.json")\
             .format(self.full_path, self.day_N)
-        # print("request is {0}".format(request_str))
+        #print("request is {0}".format(request_str))
         r = requests.get(request_str)
         # print("lesson keys: {0}".format(r.json().keys()))
-        # print("lesson content: {0}".format(r.json().get('content')))
+        #print("lesson content: {0}".format(r.json().get('content')))
         # for item in r.json().get('lessons'):
         #    print (item)
         #    print(type(item)) 
@@ -59,8 +59,8 @@ class day:
         self.content = adventech_lesson_to_MyBibe_lesson(self.content)
         self.day_data = datetime.datetime.strptime(r.json().get('date'), "%d/%m/%Y")
         self.title = r.json().get('title')
-    def __init__(self, day_N):
-        self.day_N = day_N
+    def __init__(self):
+        self.day_N = 0
 
 class comment(text_material):
     """comment for lesson, for class leaders"""
@@ -122,7 +122,7 @@ class lesson:
         #for day_N in range(1, 3):
             #print("day {0} add to array of {1}".format(day_N, len(self.days)))
             print("lesson {0} day {1}".format(self.lesson_N, day_N))
-            curr_day = day(day_N)
+            curr_day = day()
             #print("day date is {0}".format(curr_day.day_data))
             self.days.append(curr_day)
             self.days[-1].get_content(self.lesson_full_path, day_N)
@@ -489,10 +489,12 @@ def adventech_ref_to_MyBible_ref(doc, inp_tag):
     # out_text = inp_tag
     # find_book_name = re.search('{1,0}?{А,я}*', out_text)
     # find_book_name = re.compile('[А-я]*.[0-9]*')
-    find_refs = re.compile('(?:\d\s*)?[А-Я]?[а-я]+\.?\s*\d+(?:[:-]\d+)?(?:\s*-\s*\d+)?(?::\d+|(?:\s*[А-Я]?[а-я]+\s*\d+:\d+))?')
+    find_refs = re.compile('(?:\d\s*)?[А-ЯA-Z]?[а-яa-z]+\.?\s*\d+(?:[:-]\d+)?(?:\s*[-]\s*\d+)?(?::\d+|(?:\s*[А-Я]?[а-я]+\s*\d+:\d+))?')
     parse_ref = re.compile('(\d?\s?[А-Я]?[а-я]+)')
     inp_tag_text = inp_tag.get_text()
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
+    inp_tag_text = inp_tag_text.replace("–", "-")
+    
     refs = find_refs.findall(inp_tag_text)
     if (DEBUG_LEVEL > 0):
         print("process doc {0},\n tag {1}, \n inp_tag_text {2}".format(doc, inp_tag, inp_tag_text))
@@ -597,7 +599,12 @@ if __name__ == '__main__':
     #test_text_1 = """ <html><head><title>Page title</title></head><body><p>Прочитайте <a href="/beta/bref/43:5:39;14:6;20:31" data-biem="bt-2d8c19c" class="biem">Ин. 5:39; 14:6 и 20:31</a>. Библия, в частности, Евангелие, дает нам самую надежную информацию об Иисусе. Что эти конкретные тексты в Евангелии от Иоанна сообщают нам о Спасителе? Почему Христос так важен для нас и нашей веры?  Мы изучаем Слово Божье, ибо это высший источник истины. Иисус есть Истина, и в Библии мы открываем для себя Иисуса. Здесь, в Божьем Слове, Ветхом и Новом Заветах, мы узнаем, Кто есть Иисус и что Он совершил для нас. Затем мы проникаемся к Нему любовью и вверяем Ему наши жизнь и душу. Следуя за Иисусом и повинуясь Его наставлениям, открытым в Его Слове, мы можем освободиться от уз греха и этого мира. «Итак, если Сын освободит вас, то истинно свободны будете» (<a href="/beta/bref/43:8:36" data-biem="bt-1dd7f30" class="biem">Ин. 8:36</a>).</p> </body></html>"""
     #adventech_lesson_to_MyBibe_lesson(test_text_1)
     
-    
+    #request_str = ("https://sabbath-school.adventech.io/api/v1/{0}/quarterlies/{1}-{2:02}/lessons/{3:02}/days/{4:02}/read/index.json")\
+    #    .format(lang_code, lesson_year, lesson_quarter, lesson_N, lesson_day)
+    #day_inst = day()
+    #day_inst.get_content("https://sabbath-school-stage.adventech.io/api/v1/ru/quarterlies/2018-03/lessons/08", 1)
+    #exit()
+
     #SS_inst.get_content()
     devotions = db_MyBible_devotions_SS()
     devotions.set_year(lesson_year)
