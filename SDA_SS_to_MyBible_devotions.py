@@ -188,6 +188,8 @@ class lesson:
 
 class quarter:
     """quarter, includes lessons"""
+
+
     """self.site = "https://sabbath-school.adventech.io"
     self.year = 0
     self.quart_N = 0
