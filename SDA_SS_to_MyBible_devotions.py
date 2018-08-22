@@ -8,7 +8,7 @@ import re
 import sqlite3
 import datetime
 from _datetime import timedelta
-from asn1crypto.core import Integer
+#from asn1crypto.core import Integer
 
 DEBUG_LEVEL = 0
 
@@ -35,95 +35,141 @@ class intro(text_material):
 
 
 class day:
-    """day of lesson"""
+    """day of lesson
+    
+    Class gathers and stores content of lesson for particular day.
+    Attributes
+    ----------
+    day_N : int
+        number of reading for day to handle
+    day_date : datetime
+        date of reading for day to handle
+    full_path : str
+        path to lesson, it is address https:// ...
+    content : str
+        content of reading for day
+    title : str
+        title of reading for day"""
     day_N = 0
-    day_data = 0
+    day_date = 0
     full_path = ""
     content = ""
     title = ""
-    def get_content(self, full_path, day_N):
+    def get_content(self, full_path : str, day_N : int):
+        """get reading for day
+        
+        Method calls http request, parses and extracts content and title of reading for day.
+        
+        Parameters
+        ----------
+        full_path : str
+            path to lesson, it is address https:// ...
+        day_N : int
+            number of day of week (lesson) to get, 1...7"""
         self.full_path = full_path
         self.day_N = day_N
+        #create link for request by adding to lesson tail with address to day
         request_str = ("{0}/days/{1:02}/read/index.json")\
             .format(self.full_path, self.day_N)
-        #print("request is {0}".format(request_str))
+        # print("request is {0}".format(request_str))
         r = requests.get(request_str)
         # print("lesson keys: {0}".format(r.json().keys()))
-        #print("lesson content: {0}".format(r.json().get('content')))
+        # print("lesson content: {0}".format(r.json().get('content')))
         # for item in r.json().get('lessons'):
         #    print (item)
         #    print(type(item)) 
         # r = requests.get('https://sabbath-school.adventech.io/api/v1/languages/index.json')
         # print(r.json())
+        
+        #extract content, date and title
         self.content = r.json().get('content')
         self.content = adventech_lesson_to_MyBibe_lesson(self.content)
-        self.day_data = datetime.datetime.strptime(r.json().get('date'), "%d/%m/%Y")
+        self.day_date = datetime.datetime.strptime(r.json().get('date'), "%d/%m/%Y")
         self.title = r.json().get('title')
-    def __init__(self):
-        self.day_N = 0
-
 class comment(text_material):
-    """comment for lesson, for class leaders"""
+    """commentaries for lesson, for class leaders
+    
+    not realized yet, searching for sources of commentaries"""
 
     def get_content(self, lesson):
         pass
 
 
 class lesson:
-    """lesson"""
+    """lesson
+    
+    class gathers link for lesson, title of lesson, date of start and date of end
+    
+    Attributes
+    ----------
+    lesson_N : int
+        number of lesson in quarter
+    lesson_title : str
+        title of lesson
+    lesson_start, lesson_end : datetime
+        date of start end end of lesson
+    lesson_full_path : str
+        link to lesson, https:// ...
+    lesson_index : str
+        index to lesson in form of adventech.io index
+    lesson_block : str
+        response of http request with lesson
+    days[] : day
+        array of days
+    """
     lesson_N = 0
     lesson_title = ""
     lesson_start = datetime.date(2000, 1, 1)
     lesson_end = datetime.date(2000, 1, 1)
     lesson_full_path = ""
     lesson_index = ""
+    lesson_block = ""
     days = []
 
-    def get_lesson_N(self, lesson_block):
+    def get_lesson_N(self):
         # print("lesson id {0}".format(lesson_block.get("id")))
-        return lesson_block.get("id")
+        return self.lesson_block.get("id")
 
-    def get_lesson_start(self, lesson_block):
-        start_string = lesson_block.get("start_date")
+    def get_lesson_start(self):
+        start_string = self.lesson_block.get("start_date")
         # print("start_string {0}".format(start_string))
         return datetime.date(int(start_string.split('/')[2]), \
                                                  int(start_string.split('/')[1]), \
                                                  int(start_string.split('/')[0]))
 
-    def get_lesson_end(self, lesson_block):
-        end_string = lesson_block.get("end_date")
+    def get_lesson_end(self):
+        end_string = self.lesson_block.get("end_date")
         # print("end_string {0}".format(start_string))
         return datetime.date(int(end_string.split('/')[2]), \
                                                  int(end_string.split('/')[1]), \
                                                  int(end_string.split('/')[0]))
 
-    def get_lesson_full_path(self, lesson_block):
-        return lesson_block.get("full_path")
+    def get_lesson_full_path(self):
+        return self.lesson_block.get("full_path")
 
-    def get_lesson_index(self, lesson_block):
-        return    lesson_block.get("index")
+    def get_lesson_index(self):
+        return self.lesson_block.get("index")
 
-    def get_lesson_title(self, lesson_block):
+    def get_lesson_title(self):
         # print("lesson title {0}".format(lesson_block.get("title")))
-        return lesson_block.get("title")
+        return self.lesson_block.get("title")
 
-    def get_lesson_content(self, lesson_block):
+    def get_lesson_content(self):
         pass
 
-    def get_content(self, lesson_block):
-        self.lesson_N = int(self.get_lesson_N(lesson_block))
-        self.lesson_title = self.get_lesson_title(lesson_block)
-        self.lesson_start = self.get_lesson_start(lesson_block)
-        self.lesson_end = self.get_lesson_end    (lesson_block)
-        self.lesson_full_path = self.get_lesson_full_path (lesson_block)
-        self.lesson_index = self.get_lesson_index(lesson_block)
-        day_text_accumulator = ""
+    def get_content(self):
+        self.lesson_N = int(self.get_lesson_N())
+        self.lesson_title = self.get_lesson_title()
+        self.lesson_start = self.get_lesson_start()
+        self.lesson_end = self.get_lesson_end    ()
+        self.lesson_full_path = self.get_lesson_full_path ()
+        self.lesson_index = self.get_lesson_index()
         for day_N in range(1, 8):
         #for day_N in range(1, 3):
             #print("day {0} add to array of {1}".format(day_N, len(self.days)))
             print("lesson {0} day {1}".format(self.lesson_N, day_N))
             curr_day = day()
-            #print("day date is {0}".format(curr_day.day_data))
+            #print("day date is {0}".format(curr_day.day_date))
             self.days.append(curr_day)
             self.days[-1].get_content(self.lesson_full_path, day_N)
             #self.days[-1].content = "<p> {0} : {1}</p> {2}".format(str(self.lesson_start + timedelta(day_N-1)), self.days[-1].title, self.days[-1].content)
@@ -132,11 +178,12 @@ class lesson:
 
     def print_content(self):
         pass
-    def __init__(self, lesson_N):
+    def __init__(self, lesson_block, lesson_N):
+        self.lesson_block = lesson_block
         self.lesson_N = lesson_N
         self.lesson_title = ""
         self.days = []
-        print("create lesson {0}, days is {1}".format(self.lesson_N, len(self.days)))
+        #print("create lesson {0}, days is {1}".format(self.lesson_N, len(self.days)))
         
 
 class quarter:
@@ -163,21 +210,22 @@ class quarter:
         r = requests.get(request_str)
         self.quarter_title = r.json().get('quarterly').get('title')
         self.quarter_description = r.json().get('quarterly').get('description')
+        print("quarter {0}-{1:02}".format(self.year, self.quart_N))
         print("*** title : {0}".format(self.quarter_title))
-        print("*** description : {0}".format(self.quarter_description))
+        #print("*** description : {0}".format(self.quarter_description))
         self.quarter_title = r.json().get('quarterly').get('title')
         self.lessons_block = r.json().get('lessons')
         # print("lessons_block {0}".format(self.lessons_block))
-        print("lesson_set {0}".format(self.lessons_set))
+        #print("lesson_set {0}".format(self.lessons_set))
         #for index in range(0, 2):
         for index, lesson_block in enumerate(self.lessons_block):
             lesson_block = self.lessons_block[index]
-            self.lessons_set.append(lesson(index + 1))
-            self.lessons_set[-1].get_content(lesson_block)
-            print("appended {0}".format(lesson_block))
+            self.lessons_set.append(lesson(lesson_block, index + 1))
+            self.lessons_set[-1].get_content()
+            #print("appended {0}".format(lesson_block))
             # print("lesson N is {0}".format(self.lessons_set[-1].lesson_N))
             # print("lesson title is {0}".format(self.lessons_set[-1].lesson_title))
-        print("lesson_set size {0}".format(len(self.lessons_set)))
+        #print("lesson_set size {0}".format(len(self.lessons_set)))
         pass
 
     #def build_quarter(self):
@@ -264,13 +312,15 @@ class SS_year:
         print(" quartrers for selected year")
         self.quarters_list_year.sort(key = lambda quart_rec : quart_rec.get("id").split("-")[1])
         for quart in self.quarters_list_year:
-            print("{0} {1}".format(quart.get("id"), quart))
+            #print("{0} {1}".format(quart.get("id"), quart))
+            print("quarter {0}".format(quart.get("id")))
         print()
     def get_content(self):
         self.get_quarters_list()
         print("SS_year: get content")
         for quart in self.quarters_list_year:
-            print("{0} {1}".format(quart.get("id"), quart))
+            #print("{0} {1}".format(quart.get("id"), quart))
+            print("process quarter {0}".format(quart.get("id")))
             self.quarters.append(quarter())
             #self.quarters[-1].set_db_cursor(self.db_cursor)
             self.quarters[-1].set_quarter(self.year, int(quart.get("id").split("-")[1]))
@@ -396,14 +446,14 @@ class db_MyBible_devotions_SS:
                     if (lesson.lesson_N == 1 and day.day_N == 1):
                         days_accumulator = "<h3>" + "{0}-{1}".format(quarter.year, quarter.quart_N) + " " + quarter.quarter_title + "</h3>" + "<p>" + quarter.quarter_description + "</p>" +  days_accumulator
                     days_accumulator = days_accumulator + day_content_handled
-                    if (day.day_data.year == self.year):
+                    if (day.day_date.year == self.year):
                         print( "put day {0}: ".format(days_counter))
                         #print(days_accumulator)
                         self.db_cursor.execute(exec_string, (days_counter, days_accumulator))
                         days_accumulator = ""
                         days_counter += 1
                     else:
-                        print("move the day {0} to the next day".format(day.day_data))
+                        print("move the day {0} to the next day".format(day.day_date))
                         #days_accumulator = days_accumulator + day_content_handled
                 lesson_counter += 1
         pass
