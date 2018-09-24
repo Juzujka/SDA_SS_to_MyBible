@@ -8,6 +8,7 @@ import re
 import sqlite3
 import datetime
 from _datetime import timedelta
+import argparse
 #from asn1crypto.core import Integer
 
 DEBUG_LEVEL = 0
@@ -341,6 +342,11 @@ class db_MyBible_devotions_SS:
     lang = 'ru'
     SS_year_inst = SS_year()
     year = 0
+    file_name = ""
+    db_end_year = -1
+    db_end_quart = -1
+    db_inp_file_is_SDA_SS_devotions = False
+    db_last_day = 0
     def set_year(self, year):
         self.year = year
         self.SS_year_inst.set_year(self.year)
@@ -352,11 +358,14 @@ class db_MyBible_devotions_SS:
         # self.file_name = ""
         # self.db_conn = None
         # self.db_cursor = None
-    def create_db(self):
+    def create_db(self, file_name):
         if (self.year >= 1888 and self.year <= 2099):
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
-            self.file_name = "SDA-SS-{0}.devotions.SQLite3".format(self.year)
+            if (file_name == ""):
+                self.file_name = "SDA-SS-{0}.devotions.SQLite3".format(self.year)
+            else :
+                self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
             try:
                 self.db_conn = sqlite3.connect(self.file_name)
@@ -368,6 +377,37 @@ class db_MyBible_devotions_SS:
                 print(e)
                 err_name = "create database error {0}".format(e)
                 ret_val = -1
+            if (ret_val == 1):
+                #process input file
+                try:
+                    #1) check is it SDA Sabbath School devotions
+                    self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
+                    info_description = self.db_cursor.fetchall()
+                    #print("SELECT info description from database")
+                    #print(info_description)
+                    #print(info_description[0][1])
+                    if (info_description[0][1].startswith("Seventh Day Adventist Church`s Sabbath School lessons ")):
+                        self.db_inp_file_is_SDA_SS_devotions = True
+                        print("it is SDA Sabbath School devotion database")
+                        self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
+                        devotion_quart_heads = self.db_cursor.fetchall()
+                        for index, value in enumerate(devotion_quart_heads):
+                        #if (info_description[1].startswith() == "Seventh Day Adventist Church`s Sabbath School lessons "):
+                            (self.db_end_year, self.db_end_quart) = value[1][4:10].split('-')
+                            self.db_end_year = int(self.db_end_year)
+                        print("db_end is {0} - {1}".format(self.db_end_year, self.db_end_quart))
+                        self.db_cursor.execute("SELECT MAX(day) FROM devotions")
+                        self.db_last_day = self.db_cursor.fetchall()[0][0]
+                        print("the last day in db is {0}".format(self.db_last_day))
+                        if (not(self.db_end_year == self.year)):
+                            ret_val = -3
+                            print("year inconsistent, passed through arguments: {0}, in database of input file {1}".format(self.year, self.db_end_year))
+                except sqlite3.Error as e:
+                    ret_val = -2
+                    print("error SELECT  info from database : {0}", e)
+                    print("file will be cleared and created from the beginning")
+                    self.db_end_year = -1
+                    self.db_end_quart = -1
             #else:
             #    print("set correct quarter number 1...4, {0} is outside".format(self.quart_N))
             #    err_name = "incorrect quarter number"
@@ -429,7 +469,7 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        days_counter = 1
+        days_counter = self.db_last_day + 1
         lesson_counter = 1
         print("quarters len {0}".format(len(self.SS_year_inst.quarters)))
         for quarter in self.SS_year_inst.quarters:
@@ -503,7 +543,7 @@ def find_lang(lang_name):
 
 def get_lessons_list(lang_code, lessons_year, lessons_quarter):
     request_str = ("https://sabbath-school.adventech.io/api/v1/{0}/quarterlies/{1}-{2:02}/index.json")\
-        .format(lang_code, lesson_year, lesson_quarter)
+        .format(lang_code, lessons_year, lessons_quarter)
     # print("request is {0}".format(request_str))
     r = requests.get(request_str)
     # print ("items: {0}".format(r.json()))
@@ -644,9 +684,17 @@ def module_create_table_info(cursor, year, quart, name, lang):
     return(ret_val)
 # print("code of {0} is {1}".format(lang_name, find_lang(lang_name)))
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-y", "--year", type = int, help="year for lessons", default = -1)
+    parser.add_argument("-a", "--append", action = "store_true", help = "add new lessons to the end of existing database", default = False)
+    parser.add_argument("-o", "--db_file", help = "name of database output file", default = "")
+    args = parser.parse_args()
     lang_name = "Russian"
-    lesson_year = 2018
-    lesson_quarter = 2
+    if (args.year > 1888):
+        lesson_year = args.year
+    else:
+        lesson_year = datetime.datetime.now().year
+    #lesson_quarter = 2
     #SS_inst = SS_year(lesson_year)
     #test_text_1 = """ <html><head><title>Page title</title></head><body><p>Прочитайте <a href="/beta/bref/43:5:39;14:6;20:31" data-biem="bt-2d8c19c" class="biem">Ин. 5:39; 14:6 и 20:31</a>. Библия, в частности, Евангелие, дает нам самую надежную информацию об Иисусе. Что эти конкретные тексты в Евангелии от Иоанна сообщают нам о Спасителе? Почему Христос так важен для нас и нашей веры?  Мы изучаем Слово Божье, ибо это высший источник истины. Иисус есть Истина, и в Библии мы открываем для себя Иисуса. Здесь, в Божьем Слове, Ветхом и Новом Заветах, мы узнаем, Кто есть Иисус и что Он совершил для нас. Затем мы проникаемся к Нему любовью и вверяем Ему наши жизнь и душу. Следуя за Иисусом и повинуясь Его наставлениям, открытым в Его Слове, мы можем освободиться от уз греха и этого мира. «Итак, если Сын освободит вас, то истинно свободны будете» (<a href="/beta/bref/43:8:36" data-biem="bt-1dd7f30" class="biem">Ин. 8:36</a>).</p> </body></html>"""
     #adventech_lesson_to_MyBibe_lesson(test_text_1)
@@ -661,15 +709,24 @@ if __name__ == '__main__':
     devotions = db_MyBible_devotions_SS()
     devotions.set_year(lesson_year)
     #devotions.set_quarter(lesson_year, lesson_quarter)
-    devotions.create_db()
+    devotions.create_db(args.db_file)
     #devotions.get_quarter()
     #devotions.quarter.print_quarter()
-    print ("-- get content --")
+    devotions.SS_year_inst.get_quarters_list()
+    if (args.append):
+        # compare quarters in the file and in the source
+        if (len(devotions.SS_year_inst.quarters_list) <= devotions.db_end_quart):
+            print("nothing to add")
+        else:
+            #remove from list from source quarters which already in database
+            for i in range(0, devotions.db_end_quart) :
+                devotions.SS_year_inst.quarters_list.pop(0)
+    """print ("-- get content --")
     devotions.SS_year_inst.get_content()
     print ("-- create_table_info --")
     devotions.create_table_info()
     print ("-- create_table_devotions --")
-    devotions.create_table_devotions()
+    devotions.create_table_devotions()"""
     
     
     """
