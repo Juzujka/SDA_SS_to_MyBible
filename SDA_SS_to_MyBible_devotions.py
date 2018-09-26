@@ -9,6 +9,7 @@ import sqlite3
 import datetime
 from _datetime import timedelta
 import argparse
+import os
 #from asn1crypto.core import Integer
 
 DEBUG_LEVEL = 0
@@ -297,7 +298,7 @@ class SS_year:
     def set_year(self, year):
         self.year = year
     def get_quarters_list(self):
-        self.quarters_list = []
+        self.quarters_list_year = []
         request_str = ("{0}/api/v1/{1}/quarterlies/index.json")\
             .format(self.site, self.lang_code, self.year)
         r = requests.get(request_str)
@@ -319,12 +320,15 @@ class SS_year:
             print("quarter {0}".format(quart.get("id")))
         print()
     def get_content(self):
-        self.get_quarters_list()
+        #self.get_quarters_list()
         print("SS_year: get content")
+        print("self.quarters {0}".format(self.quarters))
         for quart in self.quarters_list_year:
             #print("{0} {1}".format(quart.get("id"), quart))
             print("process quarter {0}".format(quart.get("id")))
+            #print("type of quarters {0}, type of quart {1}".format(self.quarters, quart))
             self.quarters.append(quarter())
+            print("self.quarters after append {0}".format(self.quarters))
             #self.quarters[-1].set_db_cursor(self.db_cursor)
             self.quarters[-1].set_quarter(self.year, int(quart.get("id").split("-")[1]))
             self.quarters[-1].get_content()
@@ -358,6 +362,66 @@ class db_MyBible_devotions_SS:
         # self.file_name = ""
         # self.db_conn = None
         # self.db_cursor = None
+    def connect_to_db(self, file_name):
+        if (self.year >= 1888 and self.year <= 2099):
+            #if (self.quart_N >= 1 and self.quart_N <= 4):
+            #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
+            if (file_name == ""):
+                self.file_name = "SDA-SS-{0}.devotions.SQLite3".format(self.year)
+            else :
+                self.file_name = file_name
+            if (os.path.isfile(self.file_name)):
+                try:
+                    self.db_conn = sqlite3.connect(self.file_name)
+                    self.db_cursor = self.db_conn.cursor()
+                    print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
+                    print("sqlite3 version {0}".format(sqlite3.version))
+                    ret_val = 1
+                except sqlite3.Error as e:
+                    print(e)
+                    err_name = "create database error {0}".format(e)
+                    ret_val = -1
+                if (ret_val == 1):
+                    #process input file
+                    try:
+                        #1) check is it SDA Sabbath School devotions
+                        self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
+                        info_description = self.db_cursor.fetchall()
+                        #print("SELECT info description from database")
+                        #print(info_description)
+                        #print(info_description[0][1])
+                        if (info_description[0][1].startswith("Seventh Day Adventist Church`s Sabbath School lessons ")):
+                            self.db_inp_file_is_SDA_SS_devotions = True
+                            print("it is SDA Sabbath School devotion database")
+                            self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
+                            devotion_quart_heads = self.db_cursor.fetchall()
+                            for index, value in enumerate(devotion_quart_heads):
+                            #if (info_description[1].startswith() == "Seventh Day Adventist Church`s Sabbath School lessons "):
+                                (self.db_end_year, self.db_end_quart) = value[1][4:10].split('-')
+                                self.db_end_year = int(self.db_end_year)
+                                self.db_end_quart = int(self.db_end_quart)
+                            print("db_end is {0} - {1}".format(self.db_end_year, self.db_end_quart))
+                            self.db_cursor.execute("SELECT MAX(day) FROM devotions")
+                            self.db_last_day = self.db_cursor.fetchall()[0][0]
+                            print("the last day in db is {0}".format(self.db_last_day))
+                            if (not(self.db_end_year == self.year)):
+                                ret_val = -3
+                                print("year inconsistent, passed through arguments: {0}, in database of input file {1}".format(self.year, self.db_end_year))
+                    except sqlite3.Error as e:
+                        ret_val = -2
+                        print("error SELECT  info from database : {0}", e)
+                        print("file will be cleared and created from the beginning")
+                        self.db_end_year = -1
+                        self.db_end_quart = -1
+            else:
+                print("Error: unable to connect to {0}, file not exist".format(self.file_name))
+                ret_val = -4
+                self.err_name = "file not exist"
+        else:
+            print("set correct year 1888...2099, {0} is outside".format(self.year))
+            ret_val = -5
+            self.err_name = "incorrect year"
+        return(ret_val)
     def create_db(self, file_name):
         if (self.year >= 1888 and self.year <= 2099):
             #if (self.quart_N >= 1 and self.quart_N <= 4):
@@ -367,53 +431,29 @@ class db_MyBible_devotions_SS:
             else :
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
-            try:
-                self.db_conn = sqlite3.connect(self.file_name)
-                self.db_cursor = self.db_conn.cursor()
-                print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
-                print("sqlite3 version {0}".format(sqlite3.version))
-                ret_val = 1
-            except sqlite3.Error as e:
-                print(e)
-                err_name = "create database error {0}".format(e)
-                ret_val = -1
-            if (ret_val == 1):
-                #process input file
+            if (not(os.path.isfile(self.file_name))):
                 try:
-                    #1) check is it SDA Sabbath School devotions
-                    self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
-                    info_description = self.db_cursor.fetchall()
-                    #print("SELECT info description from database")
-                    #print(info_description)
-                    #print(info_description[0][1])
-                    if (info_description[0][1].startswith("Seventh Day Adventist Church`s Sabbath School lessons ")):
-                        self.db_inp_file_is_SDA_SS_devotions = True
-                        print("it is SDA Sabbath School devotion database")
-                        self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
-                        devotion_quart_heads = self.db_cursor.fetchall()
-                        for index, value in enumerate(devotion_quart_heads):
-                        #if (info_description[1].startswith() == "Seventh Day Adventist Church`s Sabbath School lessons "):
-                            (self.db_end_year, self.db_end_quart) = value[1][4:10].split('-')
-                            self.db_end_year = int(self.db_end_year)
-                        print("db_end is {0} - {1}".format(self.db_end_year, self.db_end_quart))
-                        self.db_cursor.execute("SELECT MAX(day) FROM devotions")
-                        self.db_last_day = self.db_cursor.fetchall()[0][0]
-                        print("the last day in db is {0}".format(self.db_last_day))
-                        if (not(self.db_end_year == self.year)):
-                            ret_val = -3
-                            print("year inconsistent, passed through arguments: {0}, in database of input file {1}".format(self.year, self.db_end_year))
+                    self.db_conn = sqlite3.connect(self.file_name)
+                    self.db_cursor = self.db_conn.cursor()
+                    print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
+                    print("sqlite3 version {0}".format(sqlite3.version))
+                    ret_val = 1
                 except sqlite3.Error as e:
-                    ret_val = -2
-                    print("error SELECT  info from database : {0}", e)
-                    print("file will be cleared and created from the beginning")
-                    self.db_end_year = -1
-                    self.db_end_quart = -1
-            #else:
-            #    print("set correct quarter number 1...4, {0} is outside".format(self.quart_N))
-            #    err_name = "incorrect quarter number"
+                    print(e)
+                    self.err_name = "create database error {0}".format(e)
+                    ret_val = -1
+                #else:
+                #    print("set correct quarter number 1...4, {0} is outside".format(self.quart_N))
+                #    err_name = "incorrect quarter number"
+            else:
+                print("Error: file already exists")
+                self.err_name = "file already exists"
+                ret_val = -4
         else:
             print("set correct year 1888...2099, {0} is outside".format(self.year))
+            ret_val = -5
             self.err_name = "incorrect year"
+        return(ret_val)
 
     def x_get_quarter(self):
         self.quarter = quarter()
@@ -431,7 +471,7 @@ class db_MyBible_devotions_SS:
             " the text is taken from sabbath-school.adventech.io'"
         history_of_changes_text = "'2018-06-30 - created'"
         language_text = "'{0}'".format(self.lang)
-        description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {0}'".format(self.year)
+        description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
         detailed_info_text = ""
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
@@ -455,16 +495,25 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
         return(ret_val)
-
+    def update_description(self):
+        exec_string = "DELETE FROM info WHERE name='description'" 
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
+        description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
+        exec_string = """INSERT INTO info VALUES ( 'description', {0} )""".format(description_text)
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
     def create_table_devotions(self):
         exec_string = '''CREATE TABLE IF NOT EXISTS devotions (day NUMERIC, devotion TEXT)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        exec_string = '''DELETE from devotions'''
-        if DEBUG_LEVEL > 0:
-            print ("execute db : {0}".format(exec_string))
-        self.db_cursor.execute(exec_string)
+        #exec_string = '''DELETE from devotions'''
+        #if DEBUG_LEVEL > 0:
+        #    print ("execute db : {0}".format(exec_string))
+        #self.db_cursor.execute(exec_string)
         exec_string = '''CREATE UNIQUE INDEX IF NOT EXISTS devotions_index ON devotions (day ASC)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -500,9 +549,10 @@ class db_MyBible_devotions_SS:
                 lesson_counter += 1
         pass
     def close_db(self):
-        print("close database")
-        self.db_conn.commit()
-        self.db_conn.close()
+        if (self.db_conn):
+            print("close database")
+            self.db_conn.commit()
+            self.db_conn.close()
 
     def __init__(self):
         self.year = 0
@@ -688,6 +738,7 @@ if __name__ == '__main__':
     parser.add_argument("-y", "--year", type = int, help="year for lessons", default = -1)
     parser.add_argument("-a", "--append", action = "store_true", help = "add new lessons to the end of existing database", default = False)
     parser.add_argument("-o", "--db_file", help = "name of database output file", default = "")
+    parser.add_argument("-l", "--list", action = "store_true", help = "list of available quarters", default = False)
     args = parser.parse_args()
     lang_name = "Russian"
     if (args.year > 1888):
@@ -709,10 +760,57 @@ if __name__ == '__main__':
     devotions = db_MyBible_devotions_SS()
     devotions.set_year(lesson_year)
     #devotions.set_quarter(lesson_year, lesson_quarter)
-    devotions.create_db(args.db_file)
+    if (args.list):
+        #get quarters list and print
+        devotions.SS_year_inst.get_quarters_list()
+    else:
+        if(args.append):
+            if (devotions.connect_to_db(args.db_file) > 0):
+                devotions.SS_year_inst.get_quarters_list()
+                if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
+                    print("nothing to add")
+                else:
+                    #remove from list from source quarters which already in database
+                    for i in range(0, devotions.db_end_quart) :
+                        devotions.SS_year_inst.quarters_list_year.pop(0)
+                    print ("list of quarters to add")
+                    for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
+                        print(i_quarter.get('id'))
+                    #get quarters
+                    print ("-- get content --")
+                    devotions.SS_year_inst.get_content()
+                    #append quarters
+                    print ("-- update_description() --")
+                    devotions.update_description()
+                    print ("-- create_table_devotions --")
+                    devotions.create_table_devotions()
+                    #update info
+                    #close db
+        else:
+            if(devotions.create_db(args.db_file) > 0):
+                devotions.SS_year_inst.get_quarters_list()
+                    #add quarters
+                    #update info
+                    #close db
+                #for debug, emulate previous quarter
+                devotions.SS_year_inst.quarters_list_year.pop()
+                print ("list of quarters to add")
+                for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
+                    print(i_quarter.get('id'))
+                print ("-- get content --")
+                devotions.SS_year_inst.get_content()
+                print ("-- create_table_info --")
+                devotions.create_table_info()
+                print ("-- create_table_devotions --")
+                devotions.create_table_devotions()
+            else:
+                print("Error: unable to create database")
+            
+    
+    #devotions.create_db(args.db_file)
     #devotions.get_quarter()
     #devotions.quarter.print_quarter()
-    devotions.SS_year_inst.get_quarters_list()
+    """devotions.SS_year_inst.get_quarters_list()
     if (args.append):
         # compare quarters in the file and in the source
         if (len(devotions.SS_year_inst.quarters_list) <= devotions.db_end_quart):
@@ -720,7 +818,7 @@ if __name__ == '__main__':
         else:
             #remove from list from source quarters which already in database
             for i in range(0, devotions.db_end_quart) :
-                devotions.SS_year_inst.quarters_list.pop(0)
+                devotions.SS_year_inst.quarters_list.pop(0)"""
     """print ("-- get content --")
     devotions.SS_year_inst.get_content()
     print ("-- create_table_info --")
@@ -734,7 +832,6 @@ if __name__ == '__main__':
     print("quarter title: {0}".format(lessons_list['title']))
     for item in lessons_list['list']:
         print ("id: {0}, title: {1}".format(item.get("id"), item.get("title")))
-
     db_file_name = "SDA_SS_{0}_{1}_ru.devotions.sqlite3".format(lesson_year, lesson_quarter)
     print("DB file name : {0}".format(db_file_name))
     db_conn = None
@@ -746,9 +843,7 @@ if __name__ == '__main__':
     lesson_01 = get_lesson('ru', 2018, 2, 1, 1)
     #print(lesson_01)
     lesson_01_soup = BeautifulSoup(lesson_01, 'html.parser')
-
     #print(lesson_01_soup.prettify())
-
     adventech_lesson_to_MyBibe_lesson(lesson_01_soup)
         
     #print("after handling")
