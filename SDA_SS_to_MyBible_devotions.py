@@ -793,7 +793,7 @@ if __name__ == '__main__':
                     #update info
                     #close db
                 #for debug, emulate previous quarter
-                devotions.SS_year_inst.quarters_list_year.pop()
+                #devotions.SS_year_inst.quarters_list_year.pop()
                 print ("list of quarters to add")
                 for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
                     print(i_quarter.get('id'))
