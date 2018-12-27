@@ -473,6 +473,7 @@ class db_MyBible_devotions_SS:
         language_text = "'{0}'".format(self.lang)
         description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
         detailed_info_text = ""
+        russian_numbering_text = "true"
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
@@ -491,6 +492,10 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
         exec_string = "INSERT INTO info VALUES ( 'language', {0} )".format(language_text)
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
+        exec_string = "INSERT INTO info VALUES ( 'russian_numbering', {0} )".format(russian_numbering_text)
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -654,6 +659,7 @@ def adventech_ref_to_MyBible_ref(doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("MyBible ref: {0}".format(MyBible_ref))
         MyBible_a_tag = doc.new_tag("a", href=MyBible_ref)
+        #TODO: add ";" between references
         MyBible_a_tag.insert(0, "{0}.{1} ".format(book_name, numeric_part))
         inp_tag.insert_after(MyBible_a_tag)
     inp_tag.decompose()
@@ -713,7 +719,7 @@ def module_create_table_info(cursor, year, quart, name, lang):
         " the text is taken from sabbath-school.adventech.io'"
     history_of_changes_text = "'2018-06-30 - created'"
     language_text = "'{0}'".format(lang)
-    description_text = "'Seventh Day Adventist Cheurch`s Sabbath School lesson {0}-{1}'".format(year, quart)
+    description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0}-{1}'".format(year, quart)
     # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
     exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
     if DEBUG_LEVEL > 0:
@@ -735,10 +741,10 @@ def module_create_table_info(cursor, year, quart, name, lang):
 # print("code of {0} is {1}".format(lang_name, find_lang(lang_name)))
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-y", "--year", type = int, help="year for lessons", default = -1)
-    parser.add_argument("-a", "--append", action = "store_true", help = "add new lessons to the end of existing database", default = False)
-    parser.add_argument("-o", "--db_file", help = "name of database output file", default = "")
-    parser.add_argument("-l", "--list", action = "store_true", help = "list of available quarters", default = False)
+    parser.add_argument("-y", "--year",     type = int, help="year for lessons", default = -1)
+    parser.add_argument("-a", "--append",   action = "store_true", help = "add new lessons to the end of existing database", default = False)
+    parser.add_argument("-o", "--db_file",  help = "name of database output file", default = "")
+    parser.add_argument("-l", "--list",     action = "store_true", help = "list of available quarters", default = False)
     args = parser.parse_args()
     lang_name = "Russian"
     if (args.year > 1888):
