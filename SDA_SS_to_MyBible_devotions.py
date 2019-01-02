@@ -473,7 +473,7 @@ class db_MyBible_devotions_SS:
         language_text = "'{0}'".format(self.lang)
         description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
         detailed_info_text = ""
-        russian_numbering_text = "true"
+        russian_numbering_text = "'{0}'".format(1)
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
