@@ -204,6 +204,9 @@ class quarter:
     def set_quarter(self, year, quarter):
         self.year = year
         self.quart_N = quarter
+        
+    def set_lang_code(self, lang):
+        self.lang_code = lang
 
     def set_db_cursor(self, db_cursor):
         self.db_cursor = db_cursor
@@ -211,6 +214,7 @@ class quarter:
     def get_content(self):
         request_str = ("{0}/api/v1/{1}/quarterlies/{2}-{3:02}/index.json")\
             .format(self.site, self.lang_code, self.year, self.quart_N)
+        print("get_content by {0}".format(request_str))
         r = requests.get(request_str)
         self.quarter_title = r.json().get('quarterly').get('title')
         self.quarter_description = r.json().get('quarterly').get('description')
@@ -295,12 +299,15 @@ class SS_year:
     quarters = []
     site = "https://sabbath-school.adventech.io"
     lang_code = "ru"
+    def set_lang_code(self, lang):
+        self.lang_code = lang
     def set_year(self, year):
         self.year = year
     def get_quarters_list(self):
         self.quarters_list_year = []
         request_str = ("{0}/api/v1/{1}/quarterlies/index.json")\
             .format(self.site, self.lang_code, self.year)
+        print("get_quarters_list with {0}".format(request_str))
         r = requests.get(request_str)
         #print("*** quarterlies : {0}".format(r.json()))
         #for index in range(0, 2):
@@ -328,9 +335,10 @@ class SS_year:
             print("process quarter {0}".format(quart.get("id")))
             #print("type of quarters {0}, type of quart {1}".format(self.quarters, quart))
             self.quarters.append(quarter())
-            print("self.quarters after append {0}".format(self.quarters))
+            #print("self.quarters after append {0}".format(self.quarters))
             #self.quarters[-1].set_db_cursor(self.db_cursor)
             self.quarters[-1].set_quarter(self.year, int(quart.get("id").split("-")[1]))
+            self.quarters[-1].set_lang_code(self.lang_code)
             self.quarters[-1].get_content()
 
         
@@ -343,7 +351,7 @@ class SS_year:
         self.quarters = []
 
 class db_MyBible_devotions_SS:
-    lang = 'ru'
+    lang_code = 'ru'
     SS_year_inst = SS_year()
     year = 0
     file_name = ""
@@ -351,6 +359,9 @@ class db_MyBible_devotions_SS:
     db_end_quart = -1
     db_inp_file_is_SDA_SS_devotions = False
     db_last_day = 0
+    def set_lang_code(self, lang):
+        self.lang_code = lang
+        self.SS_year_inst.set_lang_code(lang)
     def set_year(self, year):
         self.year = year
         self.SS_year_inst.set_year(self.year)
@@ -367,7 +378,7 @@ class db_MyBible_devotions_SS:
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SDA-SS-{0}.devotions.SQLite3".format(self.year)
+                self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.lang_code, self.year)
             else :
                 self.file_name = file_name
             if (os.path.isfile(self.file_name)):
@@ -427,7 +438,7 @@ class db_MyBible_devotions_SS:
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SDA-SS-{0}.devotions.SQLite3".format(self.year)
+                self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.lang_code, self.year)
             else :
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
@@ -462,6 +473,7 @@ class db_MyBible_devotions_SS:
         self.quarter.get_content()()
     def get_year(self):
         self.SS_year_inst.set_year(self.year)
+        self.SS_year_inst.set_lang_code(self.lang_code)
         self.SS_year_inst.get_quarters_list()
     def get_content(self):
         self.SS_year_inst.get_content()
@@ -470,7 +482,7 @@ class db_MyBible_devotions_SS:
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
             " the text is taken from sabbath-school.adventech.io'"
         history_of_changes_text = "'2018-06-30 - created'"
-        language_text = "'{0}'".format(self.lang)
+        language_text = "'{0}'".format(self.lang_code)
         description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
         detailed_info_text = ""
         russian_numbering_text = "'{0}'".format(1)
@@ -719,7 +731,7 @@ def module_create_table_info(cursor, year, quart, name, lang):
         " the text is taken from sabbath-school.adventech.io'"
     history_of_changes_text = "'2018-06-30 - created'"
     language_text = "'{0}'".format(lang)
-    description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0}-{1}'".format(year, quart)
+    description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0} {1}-{2}'".format(lang, year, quart)
     # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
     exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
     if DEBUG_LEVEL > 0:
@@ -744,13 +756,15 @@ if __name__ == '__main__':
     parser.add_argument("-y", "--year",     type = int, help="year for lessons", default = -1)
     parser.add_argument("-a", "--append",   action = "store_true", help = "add new lessons to the end of existing database", default = False)
     parser.add_argument("-o", "--db_file",  help = "name of database output file", default = "")
-    parser.add_argument("-l", "--list",     action = "store_true", help = "list of available quarters", default = False)
+    parser.add_argument("-l", "--list",     action = "store_true", help = "get list of available quarters", default = False)
+    parser.add_argument(      "--lang",     action = "store",      help = "language", default = "ru")
     args = parser.parse_args()
-    lang_name = "Russian"
+    #lang_name = "Russian"
     if (args.year > 1888):
         lesson_year = args.year
     else:
         lesson_year = datetime.datetime.now().year
+    print("create MyBible module with SDA Sabbath School lessons on {0} language for year {1}".format(args.lang, args.year))
     #lesson_quarter = 2
     #SS_inst = SS_year(lesson_year)
     #test_text_1 = """ <html><head><title>Page title</title></head><body><p>Прочитайте <a href="/beta/bref/43:5:39;14:6;20:31" data-biem="bt-2d8c19c" class="biem">Ин. 5:39; 14:6 и 20:31</a>. Библия, в частности, Евангелие, дает нам самую надежную информацию об Иисусе. Что эти конкретные тексты в Евангелии от Иоанна сообщают нам о Спасителе? Почему Христос так важен для нас и нашей веры?  Мы изучаем Слово Божье, ибо это высший источник истины. Иисус есть Истина, и в Библии мы открываем для себя Иисуса. Здесь, в Божьем Слове, Ветхом и Новом Заветах, мы узнаем, Кто есть Иисус и что Он совершил для нас. Затем мы проникаемся к Нему любовью и вверяем Ему наши жизнь и душу. Следуя за Иисусом и повинуясь Его наставлениям, открытым в Его Слове, мы можем освободиться от уз греха и этого мира. «Итак, если Сын освободит вас, то истинно свободны будете» (<a href="/beta/bref/43:8:36" data-biem="bt-1dd7f30" class="biem">Ин. 8:36</a>).</p> </body></html>"""
@@ -765,6 +779,7 @@ if __name__ == '__main__':
     #SS_inst.get_content()
     devotions = db_MyBible_devotions_SS()
     devotions.set_year(lesson_year)
+    devotions.set_lang_code(args.lang)
     #devotions.set_quarter(lesson_year, lesson_quarter)
     if (args.list):
         #get quarters list and print
