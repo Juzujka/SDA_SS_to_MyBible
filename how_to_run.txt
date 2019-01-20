@@ -1,0 +1,7 @@
+cd ~/My_Designs/MyBible_SS/MyBible_SS_Python
+
+python3 ./SDA_SS_to_MyBible_devotions.py
+
+sqlitebrowser ./SDA_SS_2018_2_ru.devotions.sqlite3
+
+./SDA_SS_to_MyBible_devotions.py --year 2019 --lang ru

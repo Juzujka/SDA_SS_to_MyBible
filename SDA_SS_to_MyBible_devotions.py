@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 #import uno
 import bible_codes
-import re
+import regex
 import sqlite3
 import datetime
 from _datetime import timedelta
@@ -57,6 +57,11 @@ class day:
     full_path = ""
     content = ""
     title = ""
+    lang_code = "ru"
+
+    def set_lang_code(self, lang):
+        self.lang_code = lang
+
     def get_content(self, full_path : str, day_N : int):
         """get reading for day
         
@@ -76,7 +81,7 @@ class day:
         # print("request is {0}".format(request_str))
         r = requests.get(request_str)
         # print("lesson keys: {0}".format(r.json().keys()))
-        # print("lesson content: {0}".format(r.json().get('content')))
+        print("lesson content: {0}".format(r.json().get('content')))
         # for item in r.json().get('lessons'):
         #    print (item)
         #    print(type(item)) 
@@ -85,7 +90,7 @@ class day:
         
         #extract content, date and title
         self.content = r.json().get('content')
-        self.content = adventech_lesson_to_MyBibe_lesson(self.content)
+        self.content = adventech_lesson_to_MyBibe_lesson(self.content, self.lang_code)
         self.day_date = datetime.datetime.strptime(r.json().get('date'), "%d/%m/%Y")
         self.title = r.json().get('title')
 class comment(text_material):
@@ -127,6 +132,10 @@ class lesson:
     lesson_index = ""
     lesson_block = ""
     days = []
+    lang_code = "ru"
+
+    def set_lang_code(self, lang):
+        self.lang_code = lang
 
     def get_lesson_N(self):
         # print("lesson id {0}".format(lesson_block.get("id")))
@@ -171,6 +180,7 @@ class lesson:
             #print("day {0} add to array of {1}".format(day_N, len(self.days)))
             print("lesson {0} day {1}".format(self.lesson_N, day_N))
             curr_day = day()
+            curr_day.set_lang_code(self.lang_code)
             #print("day date is {0}".format(curr_day.day_date))
             self.days.append(curr_day)
             self.days[-1].get_content(self.lesson_full_path, day_N)
@@ -229,6 +239,7 @@ class quarter:
         for index, lesson_block in enumerate(self.lessons_block):
             lesson_block = self.lessons_block[index]
             self.lessons_set.append(lesson(lesson_block, index + 1))
+            self.lessons_set[-1].set_lang_code(self.lang_code)
             self.lessons_set[-1].get_content()
             #print("appended {0}".format(lesson_block))
             # print("lesson N is {0}".format(self.lessons_set[-1].lesson_N))
@@ -642,17 +653,34 @@ def get_lesson(lang_code, lesson_year, lesson_quarter, lesson_N, lesson_day):
     return(r.json().get('content'))
 
 
-def adventech_ref_to_MyBible_ref(doc, inp_tag):
+def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # print("ru_to_MyBible keys : {0}".format(bible_codes.ru_to_MyBible.keys()))
     # print("ru_to_MyBible : {0}".format(bible_codes.ru_to_MyBible.get('Быт')))
     # out_text = inp_tag
     # find_book_name = re.search('{1,0}?{А,я}*', out_text)
     # find_book_name = re.compile('[А-я]*.[0-9]*')
-    find_refs = re.compile('(?:\d\s*)?[А-ЯA-Z]?[а-яa-z]+\.?\s*\d+(?:[:-]\d+)?(?:\s*[-]\s*\d+)?(?::\d+|(?:\s*[А-Я]?[а-я]+\s*\d+:\d+))?')
-    parse_ref = re.compile('(\d?\s?[А-Я]?[а-я]+)')
+
+    # regular expression for selecting reference to book name with verses in particular book
+                            #   /  book name                                         \ /    head, verse repeatable after selected book name                                                                                    \ 
+    find_refs = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\,\s*)?)*")
+    #(?:\d\s*)?(?:[А-ЯA-Z\І]\.\s)?[А-ЯA-Z\І]?[а-яa-z\’]+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[А-Я\І]?[а-я\’]+\s*\d+:\d+))?(?:\,\s*)?)*
+    #(?:\d\s*)?[А-ЯA-ZІ]?(\.\s)?[А-ЯA-Zа-яa-z\’\.\s]+\.?\s*\d+(?:[:-]\d+)?(?:\s*[-]\s*\d+)?(?::\d+|(?:\s*[А-Я]?[а-я]+\s*\d+:\d+))?
+
+    # regular expression for selecting book name from reference with book name , head and verse
+    parse_ref = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
+    #(\d?\s?[А-Я]?[а-я]+)
+    #(\d?\s?[А-ЯA-ZІ]?(\.\s)?[А-ЯA-Zа-яa-z\’]+)
+    
+    # replacing "and" in Russian, Ukrainian, English languages to ";" for simplifying handling 
     inp_tag_text = inp_tag.get_text()
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
+    inp_tag_text = inp_tag_text.replace(" і ", "; ")
+    inp_tag_text = inp_tag_text.replace(" and ", "; ")
+    inp_tag_text = inp_tag_text.replace(" und ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
+    # replacing "'" to "’", it is similar in Ukrainian
+    inp_tag_text = inp_tag_text.replace("'", "’")
+    
     
     refs = find_refs.findall(inp_tag_text)
     if (DEBUG_LEVEL > 0):
@@ -660,10 +688,13 @@ def adventech_ref_to_MyBible_ref(doc, inp_tag):
         print("find_refs {0}".format(refs))
         print(" * references: *")
     for ref in reversed(refs):
-        book_name = parse_ref.match(ref).group().replace(" ", "")
-        book_N = bible_codes.ru_to_MyBible.get(book_name)
+        book_name_parse_ref = parse_ref.match(ref)
+        book_name_parse_ref_group = book_name_parse_ref.group()
+        book_name = book_name_parse_ref_group.replace(" ", "")
+        #book_N = bible_codes.ru_to_MyBible.get(book_name)
+        book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name)
         if (book_N == None):
-            print("! referense not recognised:{0}".format(refs))
+            print("! referense not recognised:{0} ; {1}; {2}".format(refs, ref, book_name))
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
@@ -677,7 +708,7 @@ def adventech_ref_to_MyBible_ref(doc, inp_tag):
     inp_tag.decompose()
 
         
-def adventech_lesson_to_MyBibe_lesson(doc):
+def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
     ret_val = 0
     doc_soup = BeautifulSoup(doc, 'html.parser')
     if (DEBUG_LEVEL > 0):
@@ -692,7 +723,7 @@ def adventech_lesson_to_MyBibe_lesson(doc):
         bible_verses = item.get_text()
         if (DEBUG_LEVEL > 0):
             print("bible verses: {0}".format(bible_verses))
-        adventech_ref_to_MyBible_ref(doc_soup, item)
+        adventech_ref_to_MyBible_ref(lang_code, doc_soup, item)
         # replacing_verse = lesson_01_soup.new_tag("a", href='B:10 1:31')
         # replacing_verse.insert(0, '1:31')
         # item.insert_after(replacing_verse)
@@ -727,8 +758,9 @@ def db_connection_close(connection):
 
 def module_create_table_info(cursor, year, quart, name, lang):
     ret_val = 0
-    origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
-        " the text is taken from sabbath-school.adventech.io'"
+    origin_text = "'Created by Egor Ibragimov, juzujka@gmail.com .\n" + \
+        "The text is taken from sabbath-school.adventech.io'.\n" + \
+        'The project of this module is hosted at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible">  https://github.com/Juzujka/SDA_SS_to_MyBible</a>.'
     history_of_changes_text = "'2018-06-30 - created'"
     language_text = "'{0}'".format(lang)
     description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0} {1}-{2}'".format(lang, year, quart)
