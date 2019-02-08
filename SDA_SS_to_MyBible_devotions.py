@@ -522,7 +522,10 @@ class db_MyBible_devotions_SS:
         language_text = "'{0}'".format(self.lang_code)
         description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}, {2} version'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
         detailed_info_text = ""
-        russian_numbering_text = "'{0}'".format(1)
+        if self.lang_code == "ru" or self.lang_code == "uk" :
+            russian_numbering_text = "'{0}'".format(1)
+        else :
+            russian_numbering_text = "'{0}'".format(0)
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
@@ -731,7 +734,11 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
-        MyBible_ref = "B:{0} {1}".format(book_N, numeric_part)
+        # if book Obadiah or 2 John or 3 John or Jude or Philemon, which has one head then add head one 1:
+        if book_N == 380 or book_N == 700 or book_N == 710 or book_N == 720 or book_N == 640:
+            MyBible_ref = "B:{0} 1:{1}".format(book_N, numeric_part)
+        else :
+            MyBible_ref = "B:{0} {1}".format(book_N, numeric_part)
         if (DEBUG_LEVEL > 0):
             print("MyBible ref: {0}".format(MyBible_ref))
         MyBible_a_tag = doc.new_tag("a", href=MyBible_ref)
