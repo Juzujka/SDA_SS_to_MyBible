@@ -514,13 +514,69 @@ class db_MyBible_devotions_SS:
         self.SS_year_inst.get_quarters_list()
     def get_content(self):
         self.SS_year_inst.get_content()
+    def get_db_description_text(self):
+        """
+        returns description text
+        
+        function returns description text for database file of lesson in selected language
+        it substitutes
+         - the name of material - Seventh-day Adventist Church`s Sabbath School lessons
+         - year and quarter
+         - version: for adults or for youth
+        """
+        
+        # default values is in english
+        name_text = "Seventh-day Adventist Church`s Sabbath School lessons"
+        if (self.lesson_type == 'ad') :
+            version_text = "for adults"
+        else :
+            if (self.lesson_type == 'ay') :
+                version_text = "for youth"
+            else :
+                version_text = ""
+        if (self.lang_code == "ru") :
+            name_text = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
+            if (self.lesson_type == 'ad') :
+                version_text = "для взрослых"
+            else :
+                if (self.lesson_type == 'ay') :
+                    version_text = "для молодёжи"
+                else :
+                    version_text = ""
+        else :
+            if (self.lang_code == "uk") :
+                name_text = "Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня"
+                if (self.lesson_type == 'ad') :
+                    version_text = "для дорослих"
+                else :
+                    if (self.lesson_type == 'ay') :
+                        version_text = "для молоді"
+                    else :
+                        version_text = ""
+        description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
+        return  description_text
+    def get_db_detailed_info_text(self):
+        themes_list = "<p> List of quarterly themes: </p>"
+        if (self.lang_code == "ru") :
+            themes_list = "<p> Список тем кварталов: </p>"
+        if (self.lang_code == "uk") :
+            themes_list = "<p> Список тем кварталів: </p>"
+        for quarter in self.SS_year_inst.quarters:
+            themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
+        from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> SS_to_MyBible project at Github </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com. And glory to God!"""
+        if (self.lang_code == "ru") :
+            from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com. А славу - Богу!"""
+        if (self.lang_code == "uk") :
+            from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами. А славу - Богу!"""
+        detailed_info_text = "{0} <br><p> {1} </p>".format(themes_list, from_author_of_module_text)
+        return detailed_info_text
     def create_table_info(self):
         ret_val = 0
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
             " the text is taken from sabbath-school.adventech.io'"
         history_of_changes_text = "'2018-06-30 - created'"
         language_text = "'{0}'".format(self.lang_code)
-        description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}, {2} version'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
+        #description_text = "'{0} {1}, {2} version'".format(self.get_db_description_text_name(), self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
         detailed_info_text = ""
         if self.lang_code == "ru" or self.lang_code == "uk" :
             russian_numbering_text = "'{0}'".format(1)
@@ -539,7 +595,11 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        exec_string = """INSERT INTO info VALUES ( 'description', {0} )""".format(description_text)
+        exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(self.get_db_description_text())
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
+        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text())
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -557,8 +617,17 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
-        exec_string = """INSERT INTO info VALUES ( 'description', {0} )""".format(description_text)
+        #description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
+        exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(self.get_db_description_text())
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
+    def update_detailed_info(self):
+        exec_string = "DELETE FROM info WHERE name='detailed_info'" 
+        if DEBUG_LEVEL > 0:
+            print ("execute db : {0}".format(exec_string))
+        self.db_cursor.execute(exec_string)
+        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text())
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -857,6 +926,8 @@ if __name__ == '__main__':
                     #append quarters
                     print ("-- update_description() --")
                     devotions.update_description()
+                    print ("-- update_detailed_info() --")
+                    devotions.update_detailed_info()
                     print ("-- create_table_devotions --")
                     devotions.create_table_devotions()
                     #update info
