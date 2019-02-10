@@ -563,12 +563,15 @@ class db_MyBible_devotions_SS:
             themes_list = "<p> Список тем кварталів: </p>"
         for quarter in self.SS_year_inst.quarters:
             themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
-        from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> SS_to_MyBible project at Github </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com. And glory to God!"""
+        #from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> SS_to_MyBible project at Github </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com. And glory to God!"""
+        from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com."""
         if (self.lang_code == "ru") :
-            from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com. А славу - Богу!"""
+            #from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com. А славу - Богу!"""
+            from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com."""
         if (self.lang_code == "uk") :
-            from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами. А славу - Богу!"""
-        detailed_info_text = "{0} <br><p> {1} </p>".format(themes_list, from_author_of_module_text)
+            #from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами. А славу - Богу!"""
+            from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами."""
+        detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
         return detailed_info_text
     def create_table_info(self):
         ret_val = 0
@@ -799,7 +802,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name)
         if (book_N == None):
             print("! referense not recognised, refs : {0} ; ref {1}; book name {2}".format(refs, ref, book_name))
-            print("doc: {0}".format(doc))
+            #print("doc: {0}".format(doc))
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
@@ -952,6 +955,8 @@ if __name__ == '__main__':
             else:
                 print("Error: unable to create database")
             
+    # usefull links
+    #https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-01/lessons/07/days/01/read/index.json
     
     #devotions.create_db(args.db_file)
     #devotions.get_quarter()
