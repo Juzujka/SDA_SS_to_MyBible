@@ -409,12 +409,16 @@ class db_MyBible_devotions_SS:
         # self.file_name = ""
         # self.db_conn = None
         # self.db_cursor = None
+    def get_def_file_name(self) :
+        file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+        return file_name
     def connect_to_db(self, file_name):
         if (self.year >= 1888 and self.year <= 2099):
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+                #self.file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+                self.file_name = self.get_def_file_name()
             else :
                 self.file_name = file_name
             if (os.path.isfile(self.file_name)):
@@ -474,7 +478,8 @@ class db_MyBible_devotions_SS:
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+                #self.file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+                self.file_name = self.get_def_file_name()
             else :
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
@@ -794,6 +799,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         print("process doc {0},\n tag {1}, \n inp_tag_text {2}".format(doc, inp_tag, inp_tag_text))
         print("find_refs {0}".format(refs))
         print(" * references: *")
+    # insert ";" between references, do not insert in the end
+    is_last_ref = True  #mark: it is the end reference, beginning from the end 
     for ref in reversed(refs):
         book_name_parse_ref = parse_ref.match(ref)
         book_name_parse_ref_group = book_name_parse_ref.group()
@@ -815,8 +822,12 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
             print("MyBible ref: {0}".format(MyBible_ref))
         MyBible_a_tag = doc.new_tag("a", href=MyBible_ref)
         #TODO: add ";" between references
-        MyBible_a_tag.insert(0, "{0}.{1} ".format(book_name, numeric_part))
+        MyBible_a_tag.insert(0, "{0}.{1}".format(book_name, numeric_part))
+        #inp_tag.append(";")
+        if not(is_last_ref) :
+            inp_tag.insert_after("; ")
         inp_tag.insert_after(MyBible_a_tag)
+        is_last_ref = False
     inp_tag.decompose()
 
         
