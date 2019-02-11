@@ -414,7 +414,7 @@ class db_MyBible_devotions_SS:
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SDA-SS-{0}-{1}-{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, self.year)
+                self.file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
             else :
                 self.file_name = file_name
             if (os.path.isfile(self.file_name)):
@@ -474,7 +474,7 @@ class db_MyBible_devotions_SS:
             #if (self.quart_N >= 1 and self.quart_N <= 4):
             #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
             if (file_name == ""):
-                self.file_name = "SDA-SS-{0}-{1}-{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, self.year)
+                self.file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
             else :
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
@@ -582,9 +582,9 @@ class db_MyBible_devotions_SS:
         #description_text = "'{0} {1}, {2} version'".format(self.get_db_description_text_name(), self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
         detailed_info_text = ""
         if self.lang_code == "ru" or self.lang_code == "uk" :
-            russian_numbering_text = "'{0}'".format(1)
+            russian_numbering_text = "'{0}'".format('true')
         else :
-            russian_numbering_text = "'{0}'".format(0)
+            russian_numbering_text = "'{0}'".format('false')
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
