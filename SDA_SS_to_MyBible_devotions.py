@@ -410,7 +410,7 @@ class db_MyBible_devotions_SS:
         # self.db_conn = None
         # self.db_cursor = None
     def get_def_file_name(self) :
-        file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+        file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
         return file_name
     def connect_to_db(self, file_name):
         if (self.year >= 1888 and self.year <= 2099):
