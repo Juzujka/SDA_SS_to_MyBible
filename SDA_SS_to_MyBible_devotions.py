@@ -441,7 +441,8 @@ class db_MyBible_devotions_SS:
                         #print("SELECT info description from database")
                         #print(info_description)
                         #print(info_description[0][1])
-                        if (info_description[0][1].startswith("Seventh Day Adventist Church`s Sabbath School lessons ")):
+                        if (info_description[0][1].startswith("Seventh-day Adventist Church`s Sabbath School lessons ")):
+                        #if (info_description[0][1].startswith(get_db_description_text)):
                             self.db_inp_file_is_SDA_SS_devotions = True
                             print("it is SDA Sabbath School devotion database")
                             self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
