@@ -1,22 +1,23 @@
 #! /usr/bin/env python3
 # encoding: utf-8
-import requests
-from bs4 import BeautifulSoup
-#import uno
-import bible_codes
+import os
+import argparse
+import datetime
 import regex
 import sqlite3
-import datetime
-from _datetime import timedelta
-import argparse
-import os
-#from asn1crypto.core import Integer
+import requests
+
+from bs4 import BeautifulSoup
+
+import bible_codes
 
 DEBUG_LEVEL = 0
 
 
 class text_material:
-    """some text material: text for a day, intro, comments"""
+    """some text material: text for a day, intro, comments
+    
+    not realized"""
     content = ""
     title = ""
 
@@ -37,138 +38,179 @@ class intro(text_material):
 
 
 class day:
-    """day of lesson
+    """day of lesson (includes text material)
     
-    Class gathers and stores content of lesson for particular day.
+    Class gathers and stores content of a lesson for a particular day.
+
     Attributes
     ----------
-    day_N : int
+    day_N: int
         number of reading for day to handle
-    day_date : datetime
+    day_date: datetime
         date of reading for day to handle
-    full_path : str
+    full_path: str
         path to lesson, it is address https:// ...
-    content : str
+    content: str
         content of reading for day
-    title : str
-        title of reading for day"""
+    title: str
+        title of reading for day
+    lang_code: str
+        two-letters code of language of a day, for example 'en', 'ru', 'uk' etc.
+    """
+    
+    # number of a day in a lesson
     day_N = 0
+    # date of a day
     day_date = 0
+    # web address of a day
     full_path = ""
+    # xml content of a day, text with attached information
     content = ""
+    # title of a material for a day
     title = ""
+    # language code of a day
     lang_code = "ru"
 
     def set_lang_code(self, lang):
-        self.lang_code = lang
+        """
+        set language for a day.
 
-    def get_content(self, full_path : str, day_N : int):
-        """get reading for day
-        
-        Method calls http request, parses and extracts content and title of reading for day.
-        
         Parameters
         ----------
-        full_path : str
+        lang: str
+            two-letters code of language of a day, for example 'en', 'ru', etc.
+        """
+        self.lang_code = lang
+
+    def get_content(self, full_path: str, day_N: int):
+        """get reading for day
+
+        method calls http request,
+        parses and extracts content and title of reading for day.
+
+        Parameters
+        ----------
+        full_path: str
             path to lesson, it is address https:// ...
-        day_N : int
+        day_N: int
             number of day of week (lesson) to get, 1...7"""
+        
+        # set values of attributes to values of parameters passed to function
         self.full_path = full_path
         self.day_N = day_N
-        #create link for request by adding to lesson tail with address to day
+        # create link for request by adding to lesson tail with address to day
         request_str = ("{0}/days/{1:02}/read/index.json")\
             .format(self.full_path, self.day_N)
-        # print("request is {0}".format(request_str))
+        # send request and get xml  with day of lasson with its attributes
         r = requests.get(request_str)
-        # print("lesson keys: {0}".format(r.json().keys()))
-        #print("lesson content: {0}".format(r.json().get('content')))
-        # for item in r.json().get('lessons'):
-        #    print (item)
-        #    print(type(item)) 
-        # r = requests.get('https://sabbath-school.adventech.io/api/v1/languages/index.json')
-        # print(r.json())
-        
-        #extract content, date and title
+        # extract content, date and title
         self.content = r.json().get('content')
-        self.content = adventech_lesson_to_MyBibe_lesson(self.content, self.lang_code)
-        self.day_date = datetime.datetime.strptime(r.json().get('date'), "%d/%m/%Y")
+        # convert content of day to format for MyBible
+        self.content = adventech_lesson_to_MyBibe_lesson( self.content,
+                                                          self.lang_code)
+        # extract date from xml and save to attribute
+        self.day_date = datetime.datetime.strptime(r.json().get('date'),
+                                                    "%d/%m/%Y")
+        # extract title from xml and save to attribute
         self.title = r.json().get('title')
 class comment(text_material):
     """commentaries for lesson, for class leaders
     
-    not realized yet, searching for sources of commentaries"""
+    not realized yet, sources of commentaries needed"""
 
     def get_content(self, lesson):
         pass
 
 
 class lesson:
-    """lesson
+    """lesson (includes days)
     
-    class gathers link for lesson, title of lesson, date of start and date of end
+    class gathers link for lesson, title of lesson, dates of start and end
     
     Attributes
     ----------
-    lesson_N : int
+    lesson_N: int
         number of lesson in quarter
-    lesson_title : str
+    lesson_title: str
         title of lesson
-    lesson_start, lesson_end : datetime
+    lesson_start, lesson_end: datetime
         date of start end end of lesson
-    lesson_full_path : str
+    lesson_full_path: str
         link to lesson, https:// ...
-    lesson_index : str
+    lesson_index: str
         index to lesson in form of adventech.io index
-    lesson_block : str
+    lesson_block: str
         response of http request with lesson
-    days[] : day
+    days[]: day
         array of days
+    lang_code: str
+        two-letters code of language of a day, for example 'en', 'ru', 'uk' etc.
     """
     lesson_N = 0
     lesson_title = ""
     lesson_start = datetime.date(2000, 1, 1)
     lesson_end = datetime.date(2000, 1, 1)
+    # web address of a lesson
     lesson_full_path = ""
+    # index of a lesson in web-address 
     lesson_index = ""
+    # xml with lessons parameters
     lesson_block = ""
+    # array of day-object of this lesson
     days = []
+    # language of lesson
     lang_code = "ru"
 
     def set_lang_code(self, lang):
+        """
+        set language for a day.
+
+        Parameters
+        ----------
+        lang: str
+            two-letters code of language of a day, for example 'en', 'ru', etc.
+        """
+
         self.lang_code = lang
 
     def get_lesson_N(self):
+        """ returns number of lesson in quarter """
         # print("lesson id {0}".format(lesson_block.get("id")))
         return self.lesson_block.get("id")
 
     def get_lesson_start(self):
+        """ returns date of beginning of lesson """
         start_string = self.lesson_block.get("start_date")
         # print("start_string {0}".format(start_string))
         return datetime.date(int(start_string.split('/')[2]), \
-                                                 int(start_string.split('/')[1]), \
-                                                 int(start_string.split('/')[0]))
+                             int(start_string.split('/')[1]), \
+                             int(start_string.split('/')[0]))
 
     def get_lesson_end(self):
+        """ returns date of end of lesson """
         end_string = self.lesson_block.get("end_date")
         # print("end_string {0}".format(start_string))
         return datetime.date(int(end_string.split('/')[2]), \
-                                                 int(end_string.split('/')[1]), \
-                                                 int(end_string.split('/')[0]))
+                                 int(end_string.split('/')[1]), \
+                                 int(end_string.split('/')[0]))
 
     def get_lesson_full_path(self):
+        """ returns web-address of lesson"""
         return self.lesson_block.get("full_path")
 
     def get_lesson_index(self):
+        """ returns index of web-address of lesson """
         return self.lesson_block.get("index")
 
     def get_lesson_title(self):
-        # print("lesson title {0}".format(lesson_block.get("title")))
         return self.lesson_block.get("title")
 
-    def get_lesson_content(self):
-        pass
-
     def get_content(self):
+        """ extracts data for a lesson
+        
+        fills attributes of lesson
+        gathers data of every day in lesson"""
+        
         self.lesson_N = int(self.get_lesson_N())
         self.lesson_title = self.get_lesson_title()
         self.lesson_start = self.get_lesson_start()
@@ -176,42 +218,42 @@ class lesson:
         self.lesson_full_path = self.get_lesson_full_path ()
         self.lesson_index = self.get_lesson_index()
         for day_N in range(1, 8):
-        #for day_N in range(1, 3):
-            #print("day {0} add to array of {1}".format(day_N, len(self.days)))
+            # print number of current lesson and number of current day,
+            # it is usefull for progress indication 
             print("lesson {0} day {1}".format(self.lesson_N, day_N))
+            # create new object for day
             curr_day = day()
+            # set language of day same as language of lesson
             curr_day.set_lang_code(self.lang_code)
-            #print("day date is {0}".format(curr_day.day_date))
+            # add current day to array of days for lesson
             self.days.append(curr_day)
+            # gather day content for current day,
+            # method is called from object placed in array of days
+            # current day now is the last day in array
             self.days[-1].get_content(self.lesson_full_path, day_N)
-            #self.days[-1].content = "<p> {0} : {1}</p> {2}".format(str(self.lesson_start + timedelta(day_N-1)), self.days[-1].title, self.days[-1].content)
-        # self.day.get_content(lesson)
         pass
 
-    def print_content(self):
-        pass
     def __init__(self, lesson_block, lesson_N):
+        """ create object of lesson
+        
+        Parameters
+        ----------
+        lesson_block: text with xml
+            response of adventech.io API for lesson request
+        lesson_N: int
+            number of lesson in quarter
+        """
         self.lesson_block = lesson_block
         self.lesson_N = lesson_N
         self.lesson_title = ""
         self.days = []
-        #print("create lesson {0}, days is {1}".format(self.lesson_N, len(self.days)))
         
 
 class quarter:
-    """quarter, includes lessons"""
-
-
-    """self.site = "https://sabbath-school.adventech.io"
-    self.year = 0
-    self.quart_N = 0
-    self.lang_code = "ru"
-    intro()
-    self.lessons_block = None
-    self.lessons_set = []
-    self.quarter_title = "" """
+    """quarter (includes lessons)"""
 
     def set_quarter(self, year, quarter):
+        """ set year of lesson and number of quarter in year"""
         self.year = year
         self.quart_N = quarter
         
@@ -219,65 +261,92 @@ class quarter:
         self.lang_code = lang
 
     def set_lesson_type(self, lesson_type):
+        """ set lesson type
+        
+        Parameters
+        ----------
+        lesson_type: string
+            - ad - adults
+            - ay - youth
+            - ... as in adventech.io
+        """
         self.lesson_type = lesson_type
 
     def set_db_cursor(self, db_cursor):
+        """ set database cursor
+        
+        set database cursor for access to database
+         to read existing information for appending new quarter
+         to write new data """
         self.db_cursor = db_cursor
 
     def get_content(self):
+        """ get content for quarter
+        
+        prepares gathering data for a lesson and calls gathering methods 
+        """
+        
+        # set lesson type code for adventech.io request
         lesson_type_string = ""
-        if self.lesson_type == "ad" :
+        if self.lesson_type == "ad":
             lesson_type_string = ""
-        else :
-            if self.lesson_type == "ay" :
+        else:
+            if self.lesson_type == "ay":
                 lesson_type_string = "-ay"
+        # combine request of quarter from parameters
         request_str = ("{0}/api/v1/{1}/quarterlies/{2}-{3:02}{4}/index.json")\
-            .format(self.site, self.lang_code, self.year, self.quart_N, lesson_type_string)
+            .format(self.site, self.lang_code, self.year,
+                     self.quart_N, lesson_type_string)
         print("get_content by {0}".format(request_str))
+        # send request to adventech.io
         r = requests.get(request_str)
+        # extract from xml received in response title of lesson, description
         self.quarter_title = r.json().get('quarterly').get('title')
         self.quarter_description = r.json().get('quarterly').get('description')
-        print("quarter {0}-{1:02}{2}".format(self.year, self.quart_N, lesson_type_string))
-        print("*** title : {0}".format(self.quarter_title))
-        #print("*** description : {0}".format(self.quarter_description))
-        self.quarter_title = r.json().get('quarterly').get('title')
+        print("quarter {0}-{1:02}{2}"\
+              .format(self.year, self.quart_N, lesson_type_string))
+        print("*** title: {0}".format(self.quarter_title))
+        # extract lessons from xml received in response 
         self.lessons_block = r.json().get('lessons')
-        # print("lessons_block {0}".format(self.lessons_block))
-        #print("lesson_set {0}".format(self.lessons_set))
-        #for index in range(0, 2):
+        # enumerate lessons in lessons_block to get content from every lesson 
         for index, lesson_block in enumerate(self.lessons_block):
             lesson_block = self.lessons_block[index]
+            # create new lesson and append to array of lessons
             self.lessons_set.append(lesson(lesson_block, index + 1))
+            # set language of a new lesson
             self.lessons_set[-1].set_lang_code(self.lang_code)
+            # call content receiving for new lesson
             self.lessons_set[-1].get_content()
-            #print("appended {0}".format(lesson_block))
-            # print("lesson N is {0}".format(self.lessons_set[-1].lesson_N))
-            # print("lesson title is {0}".format(self.lessons_set[-1].lesson_title))
-        #print("lesson_set size {0}".format(len(self.lessons_set)))
         pass
 
-    #def build_quarter(self):
-    #    self.get_content()
-    #    pass
-
     def print_quarter(self):
+        """ print information about quarter, for debugging """
         for index, lesson_item in enumerate(self.lessons_set):
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_N))
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_title))
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_start))
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_end))
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_full_path))
-            print("lesson_set[{0}] {1}".format(index, self.lessons_set[index].lesson_index))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_N))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_title))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_start))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_end))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_full_path))
+            print("lesson_set[{0}] {1}"\
+                  .format(index, self.lessons_set[index].lesson_index))
             for day in self.lessons_set[index].days:
                 print("day {0} is {1}".format(day.day_N, day.content))
         
     def create_table_info(self, cursor, year, quart, name, lang):
+        """ create table info in database, deprecated """
         ret_val = 0
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
             " the text is taken from sabbath-school.adventech.io'"
         history_of_changes_text = "'2018-06-30 - created'"
         language_text = "'{0}'".format(lang)
-        description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0}-{1}'".format(year, quart)
+        description_text = \
+        "'Seventh Day Adventist Church`s Sabbath School lesson {0}-{1}'"\
+        .format(year, quart)
         detailed_info_text = ""
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
@@ -315,8 +384,12 @@ class quarter:
         pass
 
 class SS_year:
-    quarters_list_whole = []
+    """ year class (includes quarters)
+    
+    """
+    # array of records of quarter in xml response from adventech.io
     quarters_list_year = []
+    # array of quarter objects
     quarters = []
     site = "https://sabbath-school.adventech.io"
     lang_code = "ru"
@@ -324,46 +397,61 @@ class SS_year:
     def set_lang_code(self, lang):
         self.lang_code = lang
     def set_lesson_type(self, lesson_type):
+        """ set lesson type
+        
+        Parameters
+        ----------
+        lesson_type: string
+            - ad - adults
+            - ay - youth
+            - ... as in adventech.io
+        """
         self.lesson_type = lesson_type
     def set_year(self, year):
         self.year = year
     def get_quarters_list(self):
+        """ get list of quarters from server """
         self.quarters_list_year = []
+        # create request to adventech.io from attributes
         request_str = ("{0}/api/v1/{1}/quarterlies/index.json")\
             .format(self.site, self.lang_code, self.year)
         print("get_quarters_list with {0}".format(request_str))
+        # send request to server
         r = requests.get(request_str)
-        #print("*** quarterlies : {0}".format(r.json()))
-        #for index in range(0, 2):
-        #for index, lesson_block in enumerate(self.lessons_block):
-        #    lesson_block = self.lessons_block[index]
+        # select quarters for year and append it to quarters array
         for index, quart in enumerate(r.json()):
-        #for index in range(0, 1):
-        #for quart in r.json():
             quart = r.json()[index]
             # select quarters for this year and not for youth
-            if (int(quart.get("id").split("-")[0]) == self.year and len(quart.get("id").split("-")) == 2):
+            if (int(quart.get("id").split("-")[0])
+                == self.year and len(quart.get("id").split("-")) == 2):
                 self.quarters_list_year.append(quart)
-        print(" quarters for selected year")
-        self.quarters_list_year.sort(key = lambda quart_rec : quart_rec.get("id").split("-")[1])
+        print(" quarters for selected year: ")
+        # sort quarters in array by quarter number
+        self.quarters_list_year.sort(key = lambda quart_rec:
+                                      quart_rec.get("id").split("-")[1])
         for quart in self.quarters_list_year:
-            #print("{0} {1}".format(quart.get("id"), quart))
             print("quarter {0}".format(quart.get("id")))
         print()
     def get_content(self):
-        #self.get_quarters_list()
+        """ get content of year
+        
+        create quarter objects with appropriate parameters for every quarter in quarters_list_year
+        and get content of every quarter """
         print("SS_year: get content")
         print("self.quarters {0}".format(self.quarters))
+        # enumerate quarters elements in quarters_list_year
         for quart in self.quarters_list_year:
-            #print("{0} {1}".format(quart.get("id"), quart))
             print("process quarter {0}".format(quart.get("id")))
-            #print("type of quarters {0}, type of quart {1}".format(self.quarters, quart))
+            # create new quarter object
             self.quarters.append(quarter())
-            #print("self.quarters after append {0}".format(self.quarters))
-            #self.quarters[-1].set_db_cursor(self.db_cursor)
-            self.quarters[-1].set_quarter(self.year, int(quart.get("id").split("-")[1]))
+            # set parameters of quarter: year and quarter number, 
+            self.quarters[-1].set_quarter(self.year,
+                                           int(quart.get("id").split("-")[1]))
+            # set language
             self.quarters[-1].set_lang_code(self.lang_code)
+            # set lesson type
             self.quarters[-1].set_lesson_type(self.lesson_type)
+            # send requests chain to get content of every day
             self.quarters[-1].get_content()
 
         
@@ -371,25 +459,33 @@ class SS_year:
         self.year = 0
         self.site = "https://sabbath-school.adventech.io"
         self.lang_code = "ru"
-        self.quarters_list_whole = []
         self.quarters_list_year = []
         self.quarters = []
 
 class db_MyBible_devotions_SS:
+    """ database with devotions (one devotion - one year) """
+    # default parameters
     lang_code = 'ru'    # language code for sabbath school text
     lesson_type = 'ad'  # type of lesson: adult, youth etc.
-    SS_year_inst = SS_year()
+    SS_year_inst = SS_year()    # year class instance
     year = 0
+    # name of database file
     file_name = ""
+    # year in database
     db_end_year = -1
+    # end quarter in database
     db_end_quart = -1
+    # variable stores result of check
+    # if file with name file_name is file with devotions
     db_inp_file_is_SDA_SS_devotions = False
+    # last day in database
     db_last_day = 0
     def lesson_type_to_text(self):
+        """ returns text description of type of lesson """
         lesson_type_descr = "unknown"
-        if self.lesson_type == 'ad' :
+        if self.lesson_type == 'ad':
             lesson_type_descr = 'adult'
-        if self.lesson_type == 'ay' :
+        if self.lesson_type == 'ay':
             lesson_type_descr = 'youth'
         return lesson_type_descr
     def set_lang_code(self, lang):
@@ -401,28 +497,24 @@ class db_MyBible_devotions_SS:
     def set_year(self, year):
         self.year = year
         self.SS_year_inst.set_year(self.year)
-    #def set_quarter(self, year, quart_N):
-    #    self.year = year
-    #    self.quart_N = quart_N
-
-        # self.err_name = ""
-        # self.file_name = ""
-        # self.db_conn = None
-        # self.db_cursor = None
-    def get_def_file_name(self) :
+    def get_def_file_name(self):
+        """ returns default file name of database """
         file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
         return file_name
     def connect_to_db(self, file_name):
+        """ opens database in file_name and check if it is actual devotions"""
+        
+        # check year passed in parameters
         if (self.year >= 1888 and self.year <= 2099):
-            #if (self.quart_N >= 1 and self.quart_N <= 4):
-            #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
+            # if file name is empty then use default file name
             if (file_name == ""):
-                #self.file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
                 self.file_name = self.get_def_file_name()
-            else :
+            else:
                 self.file_name = file_name
+            # check if file with file_name exists
             if (os.path.isfile(self.file_name)):
                 try:
+                    # try to open file_name as database
                     self.db_conn = sqlite3.connect(self.file_name)
                     self.db_cursor = self.db_conn.cursor()
                     print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
@@ -438,21 +530,19 @@ class db_MyBible_devotions_SS:
                         #1) check is it SDA Sabbath School devotions
                         self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
                         info_description = self.db_cursor.fetchall()
-                        #print("SELECT info description from database")
-                        #print(info_description)
-                        #print(info_description[0][1])
+                        # TODO : fix check for different languages
                         if (info_description[0][1].startswith("Seventh-day Adventist Church`s Sabbath School lessons ")):
-                        #if (info_description[0][1].startswith(get_db_description_text)):
                             self.db_inp_file_is_SDA_SS_devotions = True
                             print("it is SDA Sabbath School devotion database")
+                            # find the last quarter in database
                             self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
                             devotion_quart_heads = self.db_cursor.fetchall()
                             for index, value in enumerate(devotion_quart_heads):
-                            #if (info_description[1].startswith() == "Seventh Day Adventist Church`s Sabbath School lessons "):
                                 (self.db_end_year, self.db_end_quart) = value[1][4:10].split('-')
                                 self.db_end_year = int(self.db_end_year)
                                 self.db_end_quart = int(self.db_end_quart)
                             print("db_end is {0} - {1}".format(self.db_end_year, self.db_end_quart))
+                            # find the last day in database
                             self.db_cursor.execute("SELECT MAX(day) FROM devotions")
                             self.db_last_day = self.db_cursor.fetchall()[0][0]
                             print("the last day in db is {0}".format(self.db_last_day))
@@ -475,16 +565,18 @@ class db_MyBible_devotions_SS:
             self.err_name = "incorrect year"
         return(ret_val)
     def create_db(self, file_name):
+        """ create new database with devotions """
+        # check year
         if (self.year >= 1888 and self.year <= 2099):
-            #if (self.quart_N >= 1 and self.quart_N <= 4):
-            #    self.file_name = "SDA-SS-{0}-{1}.devotions.SQLite3".format(self.year, self.quart_N)
+            # if file_name is empty then use default file name
             if (file_name == ""):
-                #self.file_name = "SS-{0}-{1}`{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
                 self.file_name = self.get_def_file_name()
-            else :
+            else:
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
+            # check if file with file_name is exist 
             if (not(os.path.isfile(self.file_name))):
+                # create file file_name with database
                 try:
                     self.db_conn = sqlite3.connect(self.file_name)
                     self.db_cursor = self.db_conn.cursor()
@@ -499,6 +591,7 @@ class db_MyBible_devotions_SS:
                 #    print("set correct quarter number 1...4, {0} is outside".format(self.quart_N))
                 #    err_name = "incorrect quarter number"
             else:
+                # if file file_name exists, then returns with error
                 print("Error: file already exists")
                 self.err_name = "file already exists"
                 ret_val = -4
@@ -508,17 +601,14 @@ class db_MyBible_devotions_SS:
             self.err_name = "incorrect year"
         return(ret_val)
 
-    def x_get_quarter(self):
-        self.quarter = quarter()
-        self.quarter.set_db_cursor(self.db_cursor)
-        self.quarter.set_quarter(self.year, self.quart_N)
-        self.quarter.get_content()()
     def get_year(self):
+        """ set parameters of year and get list of quarters in year """
         self.SS_year_inst.set_year(self.year)
         self.SS_year_inst.set_lang_code(self.lang_code)
         self.SS_year_inst.set_lesson_type(self.lesson_type)
         self.SS_year_inst.get_quarters_list()
     def get_content(self):
+        """ send chain of requests to get content of days """
         self.SS_year_inst.get_content()
     def get_db_description_text(self):
         """
@@ -531,55 +621,57 @@ class db_MyBible_devotions_SS:
          - version: for adults or for youth
         """
         
-        # default values is in english
+        # set description text in different languages
+        # default values is in English
+        # set header of devotion
+        # set description of type of lesson
         name_text = "Seventh-day Adventist Church`s Sabbath School lessons"
-        if (self.lesson_type == 'ad') :
+        if (self.lesson_type == 'ad'):
             version_text = "for adults"
-        else :
-            if (self.lesson_type == 'ay') :
+        else:
+            if (self.lesson_type == 'ay'):
                 version_text = "for youth"
-            else :
+            else:
                 version_text = ""
-        if (self.lang_code == "ru") :
+        if (self.lang_code == "ru"):
             name_text = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
-            if (self.lesson_type == 'ad') :
+            if (self.lesson_type == 'ad'):
                 version_text = "для взрослых"
-            else :
-                if (self.lesson_type == 'ay') :
+            else:
+                if (self.lesson_type == 'ay'):
                     version_text = "для молодёжи"
-                else :
+                else:
                     version_text = ""
-        else :
-            if (self.lang_code == "uk") :
+        else:
+            if (self.lang_code == "uk"):
                 name_text = "Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня"
-                if (self.lesson_type == 'ad') :
+                if (self.lesson_type == 'ad'):
                     version_text = "для дорослих"
-                else :
-                    if (self.lesson_type == 'ay') :
+                else:
+                    if (self.lesson_type == 'ay'):
                         version_text = "для молоді"
-                    else :
+                    else:
                         version_text = ""
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
         return  description_text
     def get_db_detailed_info_text(self):
+        """ set detailed description for different languages """
         themes_list = "<p> List of quarterly themes: </p>"
-        if (self.lang_code == "ru") :
+        if (self.lang_code == "ru"):
             themes_list = "<p> Список тем кварталов: </p>"
-        if (self.lang_code == "uk") :
+        if (self.lang_code == "uk"):
             themes_list = "<p> Список тем кварталів: </p>"
         for quarter in self.SS_year_inst.quarters:
             themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
-        #from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> SS_to_MyBible project at Github </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com. And glory to God!"""
         from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com."""
-        if (self.lang_code == "ru") :
-            #from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com. А славу - Богу!"""
+        if (self.lang_code == "ru"):
             from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com."""
-        if (self.lang_code == "uk") :
-            #from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">проект SS_to_MyBile на Github</a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами. А славу - Богу!"""
+        if (self.lang_code == "uk"):
             from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами."""
         detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
         return detailed_info_text
     def create_table_info(self):
+        """ create table 'info' for MyBible devotion database"""
         ret_val = 0
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
             " the text is taken from sabbath-school.adventech.io'"
@@ -587,9 +679,9 @@ class db_MyBible_devotions_SS:
         language_text = "'{0}'".format(self.lang_code)
         #description_text = "'{0} {1}, {2} version'".format(self.get_db_description_text_name(), self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
         detailed_info_text = ""
-        if self.lang_code == "ru" or self.lang_code == "uk" :
+        if self.lang_code == "ru" or self.lang_code == "uk":
             russian_numbering_text = "'{0}'".format('true')
-        else :
+        else:
             russian_numbering_text = "'{0}'".format('false')
         # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
@@ -622,6 +714,7 @@ class db_MyBible_devotions_SS:
         self.db_cursor.execute(exec_string)
         return(ret_val)
     def update_description(self):
+        """ update description of existing database """
         exec_string = "DELETE FROM info WHERE name='description'" 
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -632,6 +725,7 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
     def update_detailed_info(self):
+        """ update detailed_info of existing database """
         exec_string = "DELETE FROM info WHERE name='detailed_info'" 
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -641,19 +735,18 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
     def create_table_devotions(self):
+        """ write days into database from gathered days in lessons in quarters in year"""
+        
         exec_string = '''CREATE TABLE IF NOT EXISTS devotions (day NUMERIC, devotion TEXT)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        #exec_string = '''DELETE from devotions'''
-        #if DEBUG_LEVEL > 0:
-        #    print ("execute db : {0}".format(exec_string))
-        #self.db_cursor.execute(exec_string)
         exec_string = '''CREATE UNIQUE INDEX IF NOT EXISTS devotions_index ON devotions (day ASC)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
         days_counter = self.db_last_day + 1
+        # next day after last day in database in the first day of current quarter
         lesson_counter = 1
         print("quarters len {0}".format(len(self.SS_year_inst.quarters)))
         for quarter in self.SS_year_inst.quarters:
@@ -661,32 +754,34 @@ class db_MyBible_devotions_SS:
             for lesson in quarter.lessons_set:
                 print("lesson N {0:2} - {1:2}".format(lesson_counter, lesson.lesson_N))
                 print("days len {0}".format(len(lesson.days)))
+                # days_accumulator concatenates html for current day
+                # in the beginning and in the end of year days in database possible considers days of current quarter from year before and year after current 
                 days_accumulator = ""
                 for day in lesson.days:
-                    #day_content_handled = "<p> {0} : {1}</p> {2}".format(str(lesson.lesson_start + timedelta(day.day_N-1)), day.title, day.content) 
+                    # day starts from lesson number and header
                     day_content_handled = "<p>  lesson № {0} day {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'en') :
+                    if (self.lang_code == 'en'):
                         day_content_handled = "<p>  lesson № {0} day {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'ru') :
+                    if (self.lang_code == 'ru'):
                         day_content_handled = "<p>  урок № {0} день {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'uk') :
+                    if (self.lang_code == 'uk'):
                         day_content_handled = "<p>  урок № {0} день {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
                     exec_string = '''INSERT INTO devotions VALUES ( ?, ? )'''
                     if DEBUG_LEVEL > 0:
                         print ("execute db : {0}".format(exec_string))
-                    #print("day.content: {0}".format(day.content))
+                    # if it is the first day in quarter then add quarter title and quarter description 
                     if (lesson.lesson_N == 1 and day.day_N == 1):
                         days_accumulator = "<h3>" + "{0}-{1}".format(quarter.year, quarter.quart_N) + " " + quarter.quarter_title + "</h3>" + "<p>" + quarter.quarter_description + "</p>" +  days_accumulator
                     days_accumulator = days_accumulator + day_content_handled
+                    # if current day is not in current year then keep in days_accumulator
                     if (day.day_date.year == self.year):
+                        # if current day is in current year then put day into database and clear days_accumulator
                         print( "put day {0}: ".format(days_counter))
-                        #print(days_accumulator)
                         self.db_cursor.execute(exec_string, (days_counter, days_accumulator))
                         days_accumulator = ""
                         days_counter += 1
                     else:
                         print("move the day {0} to the next day".format(day.day_date))
-                        #days_accumulator = days_accumulator + day_content_handled
                 lesson_counter += 1
         pass
     def close_db(self):
@@ -706,83 +801,15 @@ class db_MyBible_devotions_SS:
     def __del__(self):
         self.close_db()
 
-
-def find_lang(lang_name):
-
-    r = requests.get('https://sabbath-school.adventech.io/api/v1/languages/index.json')
-    # print(r.json())
-    # print(r.json()[1], "type is ", type(r.json()[1]))
-
-    # print(r.json().keys())
-
-    lang_code = ""
-    print("r.json(): {0}".format(r.json()))
-    print("type or r.json(): {0}".format(type(r.json())))
-    for item in r.json():
-        # print("item {0} key {1}".format(item, item.get('name')))
-        print("item: {0}", format(item))
-        print("type(item): {0}", format(type(item)))
-        if (item.get('name') == lang_name):
-            lang_code = item.get('code')
-
-    # print ("code of {0} is {1}".format(lang_name, lang_code))
-
-    return lang_code
-
-# find code for Russian language
-
-
-def get_lessons_list(lang_code, lessons_year, lessons_quarter):
-    request_str = ("https://sabbath-school.adventech.io/api/v1/{0}/quarterlies/{1}-{2:02}/index.json")\
-        .format(lang_code, lessons_year, lessons_quarter)
-    # print("request is {0}".format(request_str))
-    r = requests.get(request_str)
-    # print ("items: {0}".format(r.json()))
-    print("*** title : {0}".format(r.json().get('quarterly').get('title')))
-    # print ("items: {0}".format(r.json().get('quarterly')))
-    # print ("quarterly.description : {0}".format(r.json().get('quarterly').get('description')))
-    # print ("--lessons--")
-    # for item in r.json().get('lessons'):
-    #    print (item)
-    #    print(type(item))
-    lessons = {'title':r.json().get('quarterly').get('title'), 'list':r.json().get('lessons')}
-    # lessons['title'] = r.json().get('title')
-    # lessons['list'] = r.json().get('lessons')
-    return(lessons)
-
-
-def get_lesson(lang_code, lesson_year, lesson_quarter, lesson_N, lesson_day):
-    request_str = ("https://sabbath-school.adventech.io/api/v1/{0}/quarterlies/{1}-{2:02}/lessons/{3:02}/days/{4:02}/read/index.json")\
-        .format(lang_code, lesson_year, lesson_quarter, lesson_N, lesson_day)
-    # print("request is {0}".format(request_str))
-    r = requests.get(request_str)
-    # print("lesson keys: {0}".format(r.json().keys()))
-    # print("lesson content: {0}".format(r.json().get('content')))
-    # for item in r.json().get('lessons'):
-    #    print (item)
-    #    print(type(item)) 
-    # r = requests.get('https://sabbath-school.adventech.io/api/v1/languages/index.json')
-    # print(r.json())
-    return(r.json().get('content'))
-
-
 def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
-    # print("ru_to_MyBible keys : {0}".format(bible_codes.ru_to_MyBible.keys()))
-    # print("ru_to_MyBible : {0}".format(bible_codes.ru_to_MyBible.get('Быт')))
-    # out_text = inp_tag
-    # find_book_name = re.search('{1,0}?{А,я}*', out_text)
-    # find_book_name = re.compile('[А-я]*.[0-9]*')
+    """ find bible references and convert to MyBible format"""
 
     # regular expression for selecting reference to book name with verses in particular book
                             #   /  book name                                         \ /    head, verse repeatable after selected book name                                                                                    \ 
     find_refs = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\,\s*)?)*")
-    #(?:\d\s*)?(?:[А-ЯA-Z\І]\.\s)?[А-ЯA-Z\І]?[а-яa-z\’]+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[А-Я\І]?[а-я\’]+\s*\d+:\d+))?(?:\,\s*)?)*
-    #(?:\d\s*)?[А-ЯA-ZІ]?(\.\s)?[А-ЯA-Zа-яa-z\’\.\s]+\.?\s*\d+(?:[:-]\d+)?(?:\s*[-]\s*\d+)?(?::\d+|(?:\s*[А-Я]?[а-я]+\s*\d+:\d+))?
 
-    # regular expression for selecting book name from reference with book name , head and verse
+    # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
-    #(\d?\s?[А-Я]?[а-я]+)
-    #(\d?\s?[А-ЯA-ZІ]?(\.\s)?[А-ЯA-Zа-яa-z\’]+)
     
     # replacing "and" in Russian, Ukrainian, English languages to ";" for simplifying handling 
     inp_tag_text = inp_tag.get_text()
@@ -800,13 +827,14 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         print("process doc {0},\n tag {1}, \n inp_tag_text {2}".format(doc, inp_tag, inp_tag_text))
         print("find_refs {0}".format(refs))
         print(" * references: *")
+
     # insert ";" between references, do not insert in the end
     is_last_ref = True  #mark: it is the end reference, beginning from the end 
+
     for ref in reversed(refs):
         book_name_parse_ref = parse_ref.match(ref)
         book_name_parse_ref_group = book_name_parse_ref.group()
         book_name = book_name_parse_ref_group.replace(" ", "")
-        #book_N = bible_codes.ru_to_MyBible.get(book_name)
         book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name)
         if (book_N == None):
             print("! referense not recognised, refs : {0} ; ref {1}; book name {2}".format(refs, ref, book_name))
@@ -817,15 +845,15 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         # if book Obadiah or 2 John or 3 John or Jude or Philemon, which has one head then add head one 1:
         if book_N == 380 or book_N == 700 or book_N == 710 or book_N == 720 or book_N == 640:
             MyBible_ref = "B:{0} 1:{1}".format(book_N, numeric_part)
-        else :
+        else:
             MyBible_ref = "B:{0} {1}".format(book_N, numeric_part)
         if (DEBUG_LEVEL > 0):
             print("MyBible ref: {0}".format(MyBible_ref))
         MyBible_a_tag = doc.new_tag("a", href=MyBible_ref)
-        #TODO: add ";" between references
         MyBible_a_tag.insert(0, "{0}.{1}".format(book_name, numeric_part))
-        #inp_tag.append(";")
-        if not(is_last_ref) :
+        
+        # add ; between references
+        if not(is_last_ref):
             inp_tag.insert_after("; ")
         inp_tag.insert_after(MyBible_a_tag)
         is_last_ref = False
@@ -833,12 +861,16 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
         
 def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
-    ret_val = 0
+    """ convert lesson to MyBible format
+
+     parces lesson material,
+     finds Bible references
+     and replaces with Bible references in MyBible fromat"""
+
     doc_soup = BeautifulSoup(doc, 'html.parser')
     if (DEBUG_LEVEL > 0):
         print ('anchors')
     anchors = doc_soup.find_all('a', class_='verse')
-    #anchors = doc_soup.find_all('a', class_='biem')
 
     for item in list(anchors):
         if (DEBUG_LEVEL > 0):
@@ -848,45 +880,10 @@ def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
         if (DEBUG_LEVEL > 0):
             print("bible verses: {0}".format(bible_verses))
         adventech_ref_to_MyBible_ref(lang_code, doc_soup, item)
-        # replacing_verse = lesson_01_soup.new_tag("a", href='B:10 1:31')
-        # replacing_verse.insert(0, '1:31')
-        # item.insert_after(replacing_verse)
-        # item.decompose()
     doc = str(doc_soup)
     #print("doc after link conversion : {0}".format(doc))
-    ret_val = 1
     return(doc)
     
-    # print("re finds: {0}".format(find_book_name.findall(out_text)))
-
-
-def module_create_table_info(cursor, year, quart, name, lang):
-    ret_val = 0
-    origin_text = "'Created by Egor Ibragimov, juzujka@gmail.com .\n" + \
-        "The text is taken from sabbath-school.adventech.io'.\n" + \
-        'The project of this module is hosted at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible">  https://github.com/Juzujka/SDA_SS_to_MyBible</a>.'
-    history_of_changes_text = "'2018-06-30 - created'"
-    language_text = "'{0}'".format(lang)
-    description_text = "'Seventh Day Adventist Church`s Sabbath School lesson {0} {1}-{2}'".format(lang, year, quart)
-    # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
-    exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
-    if DEBUG_LEVEL > 0:
-        print ("execute db : {0}".format(exec_string))
-    cursor.execute(exec_string)
-    exec_string = "INSERT INTO info VALUES ( 'origin', {0} )".format(origin_text)
-    if DEBUG_LEVEL > 0:
-        print ("execute db : {0}".format(exec_string))
-    cursor.execute(exec_string)
-    exec_string = """INSERT INTO info VALUES ( 'description', {0} )""".format(description_text)
-    if DEBUG_LEVEL > 0:
-        print ("execute db : {0}".format(exec_string))
-    cursor.execute(exec_string)
-    exec_string = "INSERT INTO info VALUES ( 'language', {0} )".format(language_text)
-    if DEBUG_LEVEL > 0:
-        print ("execute db : {0}".format(exec_string))
-    cursor.execute(exec_string)
-    return(ret_val)
-# print("code of {0} is {1}".format(lang_name, find_lang(lang_name)))
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-y", "--year",     type = int, help="year for lessons", default = -1)
@@ -902,18 +899,7 @@ if __name__ == '__main__':
     else:
         lesson_year = datetime.datetime.now().year
     print("create MyBible module with SDA Sabbath School lessons on {0} language for year {1}".format(args.lang, args.year))
-    #lesson_quarter = 2
-    #SS_inst = SS_year(lesson_year)
-    #test_text_1 = """ <html><head><title>Page title</title></head><body><p>Прочитайте <a href="/beta/bref/43:5:39;14:6;20:31" data-biem="bt-2d8c19c" class="biem">Ин. 5:39; 14:6 и 20:31</a>. Библия, в частности, Евангелие, дает нам самую надежную информацию об Иисусе. Что эти конкретные тексты в Евангелии от Иоанна сообщают нам о Спасителе? Почему Христос так важен для нас и нашей веры?  Мы изучаем Слово Божье, ибо это высший источник истины. Иисус есть Истина, и в Библии мы открываем для себя Иисуса. Здесь, в Божьем Слове, Ветхом и Новом Заветах, мы узнаем, Кто есть Иисус и что Он совершил для нас. Затем мы проникаемся к Нему любовью и вверяем Ему наши жизнь и душу. Следуя за Иисусом и повинуясь Его наставлениям, открытым в Его Слове, мы можем освободиться от уз греха и этого мира. «Итак, если Сын освободит вас, то истинно свободны будете» (<a href="/beta/bref/43:8:36" data-biem="bt-1dd7f30" class="biem">Ин. 8:36</a>).</p> </body></html>"""
-    #adventech_lesson_to_MyBibe_lesson(test_text_1)
-    
-    #request_str = ("https://sabbath-school.adventech.io/api/v1/{0}/quarterlies/{1}-{2:02}/lessons/{3:02}/days/{4:02}/read/index.json")\
-    #    .format(lang_code, lesson_year, lesson_quarter, lesson_N, lesson_day)
-    #day_inst = day()
-    #day_inst.get_content("https://sabbath-school-stage.adventech.io/api/v1/ru/quarterlies/2018-03/lessons/08", 1)
-    #exit()
 
-    #SS_inst.get_content()
     devotions = db_MyBible_devotions_SS()
     devotions.set_year(lesson_year)
     devotions.set_lang_code(args.lang)
@@ -930,7 +916,7 @@ if __name__ == '__main__':
                     print("nothing to add")
                 else:
                     #remove from list from source quarters which already in database
-                    for i in range(0, devotions.db_end_quart) :
+                    for i in range(0, devotions.db_end_quart):
                         devotions.SS_year_inst.quarters_list_year.pop(0)
                     print ("list of quarters to add")
                     for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
@@ -945,8 +931,6 @@ if __name__ == '__main__':
                     devotions.update_detailed_info()
                     print ("-- create_table_devotions --")
                     devotions.create_table_devotions()
-                    #update info
-                    #close db
         else:
             if(devotions.create_db(args.db_file) > 0):
                 devotions.SS_year_inst.get_quarters_list()
@@ -969,49 +953,3 @@ if __name__ == '__main__':
             
     # usefull links
     #https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-01/lessons/07/days/01/read/index.json
-    
-    #devotions.create_db(args.db_file)
-    #devotions.get_quarter()
-    #devotions.quarter.print_quarter()
-    """devotions.SS_year_inst.get_quarters_list()
-    if (args.append):
-        # compare quarters in the file and in the source
-        if (len(devotions.SS_year_inst.quarters_list) <= devotions.db_end_quart):
-            print("nothing to add")
-        else:
-            #remove from list from source quarters which already in database
-            for i in range(0, devotions.db_end_quart) :
-                devotions.SS_year_inst.quarters_list.pop(0)"""
-    """print ("-- get content --")
-    devotions.SS_year_inst.get_content()
-    print ("-- create_table_info --")
-    devotions.create_table_info()
-    print ("-- create_table_devotions --")
-    devotions.create_table_devotions()"""
-    
-    
-    """
-    lessons_list = get_lessons_list('ru', 2018, 2)
-    print("quarter title: {0}".format(lessons_list['title']))
-    for item in lessons_list['list']:
-        print ("id: {0}, title: {1}".format(item.get("id"), item.get("title")))
-    db_file_name = "SDA_SS_{0}_{1}_ru.devotions.sqlite3".format(lesson_year, lesson_quarter)
-    print("DB file name : {0}".format(db_file_name))
-    db_conn = None
-    db_cursor = None
-    db_conn = db_connection_create(db_file_name)
-    
-    
-    
-    lesson_01 = get_lesson('ru', 2018, 2, 1, 1)
-    #print(lesson_01)
-    lesson_01_soup = BeautifulSoup(lesson_01, 'html.parser')
-    #print(lesson_01_soup.prettify())
-    adventech_lesson_to_MyBibe_lesson(lesson_01_soup)
-        
-    #print("after handling")
-    #print(lesson_01_soup.prettify())
-    module_create_table_info(db_conn['cursor'], lesson_year, lesson_quarter, "lesson_name", "ru")
-    
-    db_connection_close(db_conn['conn'])
-    """
