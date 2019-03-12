@@ -1,5 +1,10 @@
 #! /usr/bin/env python3
 # encoding: utf-8
+""" SDA Sabbath school MyBible module generator
+
+This program creates MyBible devotions module from data from adventech.io
+"""
+
 import os
 import argparse
 import datetime
@@ -337,18 +342,18 @@ class quarter:
             for day in self.lessons_set[index].days:
                 print("day {0} is {1}".format(day.day_N, day.content))
         
+    # TODO: remove this method
     def create_table_info(self, cursor, year, quart, name, lang):
         """ create table info in database, deprecated """
         ret_val = 0
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
             " the text is taken from sabbath-school.adventech.io'"
-        history_of_changes_text = "'2018-06-30 - created'"
+        history_of_changes_text = ""
         language_text = "'{0}'".format(lang)
         description_text = \
         "'Seventh Day Adventist Church`s Sabbath School lesson {0}-{1}'"\
         .format(year, quart)
         detailed_info_text = ""
-        # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -435,7 +440,8 @@ class SS_year:
     def get_content(self):
         """ get content of year
         
-        create quarter objects with appropriate parameters for every quarter in quarters_list_year
+        create quarter objects with appropriate parameters
+        for every quarter in quarters_list_year
         and get content of every quarter """
         print("SS_year: get content")
         print("self.quarters {0}".format(self.quarters))
@@ -499,13 +505,14 @@ class db_MyBible_devotions_SS:
         self.SS_year_inst.set_year(self.year)
     def get_def_file_name(self):
         """ returns default file name of database """
-        file_name = "SS-{0}-{1}'{2}.devotions.SQLite3".format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+        file_name = "SS-{0}-{1}'{2}.devotions.SQLite3"\
+            .format(self.lang_code, self.lesson_type, str(self.year)[2:4])
         return file_name
     def connect_to_db(self, file_name):
         """ opens database in file_name and check if it is actual devotions"""
         
         # check year passed in parameters
-        if (self.year >= 1888 and self.year <= 2099):
+        if (self.year >= 1852 and self.year <= 2099):
             # if file name is empty then use default file name
             if (file_name == ""):
                 self.file_name = self.get_def_file_name()
@@ -517,7 +524,8 @@ class db_MyBible_devotions_SS:
                     # try to open file_name as database
                     self.db_conn = sqlite3.connect(self.file_name)
                     self.db_cursor = self.db_conn.cursor()
-                    print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
+                    print("connection : {0} ; cursor : {1}"\
+                          .format(self.db_conn, self.db_cursor))
                     print("sqlite3 version {0}".format(sqlite3.version))
                     ret_val = 1
                 except sqlite3.Error as e:
@@ -527,7 +535,7 @@ class db_MyBible_devotions_SS:
                 if (ret_val == 1):
                     #process input file
                     try:
-                        #1) check is it SDA Sabbath School devotions
+                        # check is it SDA Sabbath School devotions
                         self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
                         info_description = self.db_cursor.fetchall()
                         # TODO : fix check for different languages
@@ -548,7 +556,8 @@ class db_MyBible_devotions_SS:
                             print("the last day in db is {0}".format(self.db_last_day))
                             if (not(self.db_end_year == self.year)):
                                 ret_val = -3
-                                print("year inconsistent, passed through arguments: {0}, in database of input file {1}".format(self.year, self.db_end_year))
+                                print("year inconsistent, passed through arguments: {0}, in database of input file {1}"\
+                                      .format(self.year, self.db_end_year))
                     except sqlite3.Error as e:
                         ret_val = -2
                         print("error SELECT  info from database : {0}", e)
@@ -560,55 +569,55 @@ class db_MyBible_devotions_SS:
                 ret_val = -4
                 self.err_name = "file not exist"
         else:
-            print("set correct year 1888...2099, {0} is outside".format(self.year))
+            print("set correct year 1852...2099, {0} is outside".format(self.year))
             ret_val = -5
             self.err_name = "incorrect year"
         return(ret_val)
     def create_db(self, file_name):
-        """ create new database with devotions """
+        """ create new database with devotions 
+        in file with name file_name if file_name not empty
+        or use default file name """
         # check year
-        if (self.year >= 1888 and self.year <= 2099):
+        if (self.year >= 1852 and self.year <= 2099):
             # if file_name is empty then use default file name
             if (file_name == ""):
                 self.file_name = self.get_def_file_name()
             else:
                 self.file_name = file_name
             print("create db with file name {0}".format(self.file_name))
-            # check if file with file_name is exist 
+            # check if file with file_name is exists
             if (not(os.path.isfile(self.file_name))):
                 # create file file_name with database
                 try:
                     self.db_conn = sqlite3.connect(self.file_name)
                     self.db_cursor = self.db_conn.cursor()
-                    print("connection : {0} ; cursor : {1}".format(self.db_conn, self.db_cursor))
+                    print("connection : {0} ; cursor : {1}"\
+                          .format(self.db_conn, self.db_cursor))
                     print("sqlite3 version {0}".format(sqlite3.version))
                     ret_val = 1
                 except sqlite3.Error as e:
                     print(e)
                     self.err_name = "create database error {0}".format(e)
                     ret_val = -1
-                #else:
-                #    print("set correct quarter number 1...4, {0} is outside".format(self.quart_N))
-                #    err_name = "incorrect quarter number"
             else:
                 # if file file_name exists, then returns with error
                 print("Error: file already exists")
                 self.err_name = "file already exists"
                 ret_val = -4
         else:
-            print("set correct year 1888...2099, {0} is outside".format(self.year))
+            print("set correct year 1852...2099, {0} is outside".format(self.year))
             ret_val = -5
             self.err_name = "incorrect year"
         return(ret_val)
 
     def get_year(self):
-        """ set parameters of year and get list of quarters in year """
+        """ returns list of quarters in year """
         self.SS_year_inst.set_year(self.year)
         self.SS_year_inst.set_lang_code(self.lang_code)
         self.SS_year_inst.set_lesson_type(self.lesson_type)
         self.SS_year_inst.get_quarters_list()
     def get_content(self):
-        """ send chain of requests to get content of days """
+        """ sends chain of requests to get content of days """
         self.SS_year_inst.get_content()
     def get_db_description_text(self):
         """
@@ -655,7 +664,7 @@ class db_MyBible_devotions_SS:
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
         return  description_text
     def get_db_detailed_info_text(self):
-        """ set detailed description for different languages """
+        """ returns detailed info in selected languages """
         themes_list = "<p> List of quarterly themes: </p>"
         if (self.lang_code == "ru"):
             themes_list = "<p> Список тем кварталов: </p>"
@@ -677,13 +686,11 @@ class db_MyBible_devotions_SS:
             " the text is taken from sabbath-school.adventech.io'"
         history_of_changes_text = "'2018-06-30 - created'"
         language_text = "'{0}'".format(self.lang_code)
-        #description_text = "'{0} {1}, {2} version'".format(self.get_db_description_text_name(), self.SS_year_inst.quarters_list_year[-1].get('id'), self.lesson_type_to_text())
         detailed_info_text = ""
         if self.lang_code == "ru" or self.lang_code == "uk":
             russian_numbering_text = "'{0}'".format('true')
         else:
             russian_numbering_text = "'{0}'".format('false')
-        # exec_string = "CREATE TABLE 'info' (origin TEXT, {0} TEXT, history_of_changes TEXT, {1} TEXT, language TEXT, {2} TEXT)".format(origin_text, history_of_changes_text, language_text)
         exec_string = '''CREATE TABLE IF NOT EXISTS info ( name text, value text)'''
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -719,7 +726,6 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        #description_text = "'Seventh Day Adventist Church`s Sabbath School lessons {1}'".format(self.year, self.SS_year_inst.quarters_list_year[-1].get('id'))
         exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(self.get_db_description_text())
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
@@ -811,7 +817,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
     
-    # replacing "and" in Russian, Ukrainian, English languages to ";" for simplifying handling 
+    # replacing "and" in Russian, Ukrainian, English languages to ";"
+    # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace(" і ", "; ")
@@ -821,7 +828,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # replacing "'" to "’", it is similar in Ukrainian
     inp_tag_text = inp_tag_text.replace("'", "’")
     
-    
+    # collect to refs all references to Bible texts
     refs = find_refs.findall(inp_tag_text)
     if (DEBUG_LEVEL > 0):
         print("process doc {0},\n tag {1}, \n inp_tag_text {2}".format(doc, inp_tag, inp_tag_text))
@@ -830,7 +837,9 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
     # insert ";" between references, do not insert in the end
     is_last_ref = True  #mark: it is the end reference, beginning from the end 
-
+    
+    # process references from end to beginning
+    # to not to process result of processing
     for ref in reversed(refs):
         book_name_parse_ref = parse_ref.match(ref)
         book_name_parse_ref_group = book_name_parse_ref.group()
@@ -842,8 +851,11 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
-        # if book Obadiah or 2 John or 3 John or Jude or Philemon, which has one head then add head one 1:
-        if book_N == 380 or book_N == 700 or book_N == 710 or book_N == 720 or book_N == 640:
+        # concatenate reference from reference header "B:",
+        # book number and head number with verse number 
+        if (book_N == 380 or book_N == 700 or book_N == 710 or book_N == 720 or book_N == 640):
+            # if book Obadiah or 2 John or 3 John or Jude or Philemon,
+            # which has one head then add to the reference head one "1:"
             MyBible_ref = "B:{0} 1:{1}".format(book_N, numeric_part)
         else:
             MyBible_ref = "B:{0} {1}".format(book_N, numeric_part)
@@ -865,13 +877,15 @@ def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
 
      parces lesson material,
      finds Bible references
-     and replaces with Bible references in MyBible fromat"""
+     and replaces with Bible references in MyBible format"""
 
     doc_soup = BeautifulSoup(doc, 'html.parser')
     if (DEBUG_LEVEL > 0):
         print ('anchors')
+    # find all elements with tag <a> and class "verse"
     anchors = doc_soup.find_all('a', class_='verse')
 
+    # process all verses with adventech_ref_to_MyBible_ref function
     for item in list(anchors):
         if (DEBUG_LEVEL > 0):
             print("item")
@@ -881,10 +895,10 @@ def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
             print("bible verses: {0}".format(bible_verses))
         adventech_ref_to_MyBible_ref(lang_code, doc_soup, item)
     doc = str(doc_soup)
-    #print("doc after link conversion : {0}".format(doc))
     return(doc)
     
 if __name__ == '__main__':
+    # process command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-y", "--year",     type = int, help="year for lessons", default = -1)
     parser.add_argument("-a", "--append",   action = "store_true", help = "add new lessons to the end of existing database", default = False)
@@ -893,32 +907,40 @@ if __name__ == '__main__':
     parser.add_argument(      "--lang",     action = "store",      help = "language", default = "ru")
     parser.add_argument(      "--type",     action = "store",      help = "type of lesson: ad - adult, ay - youth", default = "ad")
     args = parser.parse_args()
-    #lang_name = "Russian"
-    if (args.year > 1888):
+
+    # check year, first Sabbath school lesson dated by 1852 year
+    if (args.year > 1852):
         lesson_year = args.year
     else:
         lesson_year = datetime.datetime.now().year
     print("create MyBible module with SDA Sabbath School lessons on {0} language for year {1}".format(args.lang, args.year))
 
+    # create object of database with Sabbath school devotions 
     devotions = db_MyBible_devotions_SS()
+    # set parameters from command line arguments
     devotions.set_year(lesson_year)
     devotions.set_lang_code(args.lang)
     devotions.set_lesson_type(args.type)
-    #devotions.set_quarter(lesson_year, lesson_quarter)
     if (args.list):
-        #get quarters list and print
+        #get quarters list and print, do not modify or create database file
         devotions.SS_year_inst.get_quarters_list()
     else:
         if(args.append):
+            # selected option of appending new quarters to existing database
+            
+            # try to open file as database
             if (devotions.connect_to_db(args.db_file) > 0):
+                # get list of available quarters from server
                 devotions.SS_year_inst.get_quarters_list()
+                # check if new quarters are available?
                 if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
                     print("nothing to add")
                 else:
-                    #remove from list from source quarters which already in database
+                    # remove from list the quarters which are already in database
                     for i in range(0, devotions.db_end_quart):
                         devotions.SS_year_inst.quarters_list_year.pop(0)
                     print ("list of quarters to add")
+                    # print quarters which will be added
                     for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
                         print(i_quarter.get('id'))
                     #get quarters
@@ -931,25 +953,28 @@ if __name__ == '__main__':
                     devotions.update_detailed_info()
                     print ("-- create_table_devotions --")
                     devotions.create_table_devotions()
+            else:
+                print("unable to open file with database {0}".format(args.db_file))
         else:
+            # create file with database
             if(devotions.create_db(args.db_file) > 0):
+                # get list of available quarters
                 devotions.SS_year_inst.get_quarters_list()
-                    #add quarters
-                    #update info
-                    #close db
-                #for debug, emulate previous quarter
-                #devotions.SS_year_inst.quarters_list_year.pop()
                 print ("list of quarters to add")
+                # print quarters to add
                 for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
                     print(i_quarter.get('id'))
+                # get content of quarters
                 print ("-- get content --")
                 devotions.SS_year_inst.get_content()
+                # create table with info in database file
                 print ("-- create_table_info --")
                 devotions.create_table_info()
+                # create table with devotions in database file
                 print ("-- create_table_devotions --")
                 devotions.create_table_devotions()
             else:
-                print("Error: unable to create database")
+                print("Error: unable to create database {0}".format(args.db_file))
             
     # usefull links
     #https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-01/lessons/07/days/01/read/index.json

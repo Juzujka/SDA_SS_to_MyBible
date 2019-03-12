@@ -1,4 +1,18 @@
 #! /usr/bin/env python3
+# encoding: utf-8
+
+""" Convert book of Bible abbreviation to MyBible book of Bible number'
+ 
+ This module considers dictionary of
+ pairs of variants of books of Bible abbreviations
+ with its number in MyBible format.
+ 
+ Dictionaries are collected in array which indexed by language code.
+ on 2019/03 available languages are
+ - Russian
+ - English
+ - Ukrainian 
+"""
 
 book_index_to_MyBible = {}
 
