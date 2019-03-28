@@ -199,6 +199,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Deut',50),\
 ('Deuteronomy',50),\
 ('Josh',60),\
+('Joshua',60),\
 ('Judg',70),\
 ('Judges',70),\
 ('Ruth',80),\
@@ -212,11 +213,15 @@ book_index_to_MyBible['en'] = dict([\
 ('2Kings',120),\
 ('1Chr',130),\
 ('1Chron',130),\
+('1Chronicles',130),\
 ('2Chr',140),\
 ('2Chron',140),\
+('2Chronicles',140),\
 ('Ezr',150),\
+('Ezra',150),\
 ('Neh',160),\
 ('Esth',190),\
+('Esther',190),\
 ('Job',220),\
 ('Ps',230),\
 ('Psalm',230),\
@@ -227,6 +232,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Ecclesiastes',250),\
 ('Song',260),\
 ('Songs',260),\
+('Sol',260),\
 ('Isa',290),\
 ('Isaiah',290),\
 ('Jer',300),\
@@ -251,6 +257,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Hab',420),\
 ('Habakkuk',420),\
 ('Zeph',430),\
+('Zephaniah',430),\
 ('Hag',440),\
 ('Zech',450),\
 ('Zechariah',450),\

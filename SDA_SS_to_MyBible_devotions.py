@@ -15,9 +15,53 @@ import requests
 from bs4 import BeautifulSoup
 
 import bible_codes
+from code import interact
 
 DEBUG_LEVEL = 0
 
+class internat:
+    lang_code = 'en'
+    db_info_description = {\
+        "en":"Seventh-day Adventist Church`s Sabbath School lessons",\
+        "ru":"Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня",\
+        "uk":"Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня",\
+        }
+    db_info_description_version_adult = {\
+        "en":"for adult",\
+        "ru":"для взрослых",\
+        "uk":"для дорослих",\
+        }
+    db_info_description_version_youth = {\
+        "en":"for youth",\
+        "ru":"для молодёжи",\
+        "uk":"для молоді",\
+        }
+    list_of_quarterly_themes = {\
+        "en":"List of quarterly themes:",\
+        "ru":"Список тем кварталов:",\
+        "uk":"Список тем кварталів:",\
+        }
+    from_author = {\
+        "en":"""To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com.""",\
+        "ru":"""Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com.""",\
+        "uk":"""Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами.""",\
+        }
+    origin_text = {\
+        "en":""'created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io'"",\
+        "ru":""'created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io'"",\
+        "uk":""'created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io'"",\
+        }
+    lesson = {\
+        "en":"lesson",\
+        "ru":"урок",\
+        "uk":"урок",\
+        }
+    day = {\
+        "en":"day",\
+        "ru":"день",\
+        "uk":"день",\
+        }
+     
 
 class text_material:
     """some text material: text for a day, intro, comments
@@ -106,7 +150,7 @@ class day:
         # create link for request by adding to lesson tail with address to day
         request_str = ("{0}/days/{1:02}/read/index.json")\
             .format(self.full_path, self.day_N)
-        # send request and get xml  with day of lasson with its attributes
+        # send request and get xml  with day of lesson with its attributes
         r = requests.get(request_str)
         # extract content, date and title
         self.content = r.json().get('content')
@@ -224,7 +268,7 @@ class lesson:
         self.lesson_index = self.get_lesson_index()
         for day_N in range(1, 8):
             # print number of current lesson and number of current day,
-            # it is usefull for progress indication 
+            # it is useful for progress indication 
             print("lesson {0} day {1}".format(self.lesson_N, day_N))
             # create new object for day
             curr_day = day()
@@ -343,7 +387,7 @@ class quarter:
                 print("day {0} is {1}".format(day.day_N, day.content))
         
     # TODO: remove this method
-    def create_table_info(self, cursor, year, quart, name, lang):
+    def create_table_info_x(self, cursor, year, quart, name, lang):
         """ create table info in database, deprecated """
         ret_val = 0
         origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
@@ -486,7 +530,8 @@ class db_MyBible_devotions_SS:
     db_inp_file_is_SDA_SS_devotions = False
     # last day in database
     db_last_day = 0
-    def lesson_type_to_text(self):
+    #TODO: remove this method
+    def lesson_type_to_text_x(self):
         """ returns text description of type of lesson """
         lesson_type_descr = "unknown"
         if self.lesson_type == 'ad':
@@ -539,7 +584,8 @@ class db_MyBible_devotions_SS:
                         self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")# % "description")
                         info_description = self.db_cursor.fetchall()
                         # TODO : fix check for different languages
-                        if (info_description[0][1].startswith("Seventh-day Adventist Church`s Sabbath School lessons ")):
+                        #if (info_description[0][1].startswith("Seventh-day Adventist Church`s Sabbath School lessons ")):
+                        if (info_description[0][1].startswith(internat.db_info_description[self.lang_code])):
                             self.db_inp_file_is_SDA_SS_devotions = True
                             print("it is SDA Sabbath School devotion database")
                             # find the last quarter in database
@@ -634,56 +680,28 @@ class db_MyBible_devotions_SS:
         # default values is in English
         # set header of devotion
         # set description of type of lesson
-        name_text = "Seventh-day Adventist Church`s Sabbath School lessons"
+        name_text = internat.db_info_description[self.lang_code]
         if (self.lesson_type == 'ad'):
-            version_text = "for adults"
+            version_text = internat.db_info_description_version_adult[self.lang_code]
         else:
             if (self.lesson_type == 'ay'):
-                version_text = "for youth"
+                version_text = version_text = internat.db_info_description_version_youth[self.lang_code]
             else:
                 version_text = ""
-        if (self.lang_code == "ru"):
-            name_text = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
-            if (self.lesson_type == 'ad'):
-                version_text = "для взрослых"
-            else:
-                if (self.lesson_type == 'ay'):
-                    version_text = "для молодёжи"
-                else:
-                    version_text = ""
-        else:
-            if (self.lang_code == "uk"):
-                name_text = "Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня"
-                if (self.lesson_type == 'ad'):
-                    version_text = "для дорослих"
-                else:
-                    if (self.lesson_type == 'ay'):
-                        version_text = "для молоді"
-                    else:
-                        version_text = ""
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
         return  description_text
     def get_db_detailed_info_text(self):
         """ returns detailed info in selected languages """
-        themes_list = "<p> List of quarterly themes: </p>"
-        if (self.lang_code == "ru"):
-            themes_list = "<p> Список тем кварталов: </p>"
-        if (self.lang_code == "uk"):
-            themes_list = "<p> Список тем кварталів: </p>"
+        themes_list = "<p> {0} </p>".format(internat.list_of_quarterly_themes[self.lang_code])
         for quarter in self.SS_year_inst.quarters:
             themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
-        from_author_of_module_text = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com."""
-        if (self.lang_code == "ru"):
-            from_author_of_module_text = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com."""
-        if (self.lang_code == "uk"):
-            from_author_of_module_text = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами."""
+        from_author_of_module_text = internat.from_author[self.lang_code]
         detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
         return detailed_info_text
     def create_table_info(self):
         """ create table 'info' for MyBible devotion database"""
         ret_val = 0
-        origin_text = "'created by Egor Ibragimov, juzujka@gmail.com\n" + \
-            " the text is taken from sabbath-school.adventech.io'"
+        origin_text = internat.origin_text[self.lang_code]
         history_of_changes_text = "'2018-06-30 - created'"
         language_text = "'{0}'".format(self.lang_code)
         detailed_info_text = ""
@@ -704,6 +722,7 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
         exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(self.get_db_description_text())
+        #exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(internat.db_info_description[self.lang_code])
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -765,13 +784,7 @@ class db_MyBible_devotions_SS:
                 days_accumulator = ""
                 for day in lesson.days:
                     # day starts from lesson number and header
-                    day_content_handled = "<p>  lesson № {0} day {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'en'):
-                        day_content_handled = "<p>  lesson № {0} day {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'ru'):
-                        day_content_handled = "<p>  урок № {0} день {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
-                    if (self.lang_code == 'uk'):
-                        day_content_handled = "<p>  урок № {0} день {1}</p> <h4>{2}</h4> {3}".format(str(lesson.lesson_N), str(day.day_N), day.title, day.content)
+                    day_content_handled = "<p>  {0} № {1} {2} {3}</p> <h4>{4}</h4> {5}".format(internat.lesson[self.lang_code], str(lesson.lesson_N), internat.day[self.lang_code], str(day.day_N), day.title, day.content)
                     exec_string = '''INSERT INTO devotions VALUES ( ?, ? )'''
                     if DEBUG_LEVEL > 0:
                         print ("execute db : {0}".format(exec_string))
@@ -807,6 +820,54 @@ class db_MyBible_devotions_SS:
     def __del__(self):
         self.close_db()
 
+def get_list_of_1st_digit_book(lang_code = 'en'):
+    dict_of_1st_digit_book = {}
+    for i, (key, val) in enumerate(bible_codes.book_index_to_MyBible[lang_code].items()):
+        if (key[0].isdigit()):
+            """if (val in dict_of_1st_digit_book.values()):
+                for i2, (key2, val2) in enumerate(dict_of_1st_digit_book.items()):
+                    if val == val2:
+                        if len(key) < len(key2):
+                            dict_of_1st_digit_book.pop(key2)
+                            dict_of_1st_digit_book[key] = val
+            else:"""
+            dict_of_1st_digit_book[key] = val
+    return dict_of_1st_digit_book
+                        
+            
+    
+
+def add_sepators_to_refs_in_Eng(inp_tag_text):
+    """references in lessons in English is very specific
+    this function adopts references"""
+    
+    # find books with names starts with digit, add separator ';' before book name
+    # because of references divided with commas, it is difficult to separate book name from previous reference
+    # this part of code search every name starting from digit in reference
+    # and adds ';' symbol before book names was found
+    
+    # enumerate all references from dictionary of book names
+    for i1, (key, val) in enumerate(bible_codes.book_index_to_MyBible['en'].items()):
+        # if it is book name starting from digit
+        if (key[0].isdigit()):
+            # add space before and after the digit
+            templ_to_search = " " + key[0] + " " + key[1:]
+            # replace space before digit with '&',
+            # so others variants of name  of this book
+            #will not modify this part again
+            templ_replacing = "&" + key[0] + " " + key[1:]
+            inp_tag_text = inp_tag_text.replace(templ_to_search, templ_replacing)
+        # now all digit-starting book names are separated with '&'
+        # if comma was between references then remove this commas
+        inp_tag_text = inp_tag_text.replace(",&", " &")
+        # next is replacing '&' with ';'
+        inp_tag_text = inp_tag_text.replace("&", "; ")
+        # some words in references
+        inp_tag_text = inp_tag_text.replace("see also", " ")
+        # long book name for Song of Solomon
+        inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
+    return inp_tag_text
+
 def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     """ find bible references and convert to MyBible format"""
 
@@ -816,10 +877,15 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile("(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
+
+    #in texts on English references divided by commas. book 1:2 , 1 Cor sees as book1:2,1   Cor.  
+    #adding separators before names of numerated books
     
     # replacing "and" in Russian, Ukrainian, English languages to ";"
     # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
+    if (lang_code == 'en'):
+        inp_tag_text = add_sepators_to_refs_in_Eng(inp_tag_text)
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace(" і ", "; ")
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
@@ -875,7 +941,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 def adventech_lesson_to_MyBibe_lesson(doc, lang_code):
     """ convert lesson to MyBible format
 
-     parces lesson material,
+     parses lesson material,
      finds Bible references
      and replaces with Bible references in MyBible format"""
 
@@ -906,6 +972,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--list",     action = "store_true", help = "get list of available quarters", default = False)
     parser.add_argument(      "--lang",     action = "store",      help = "language", default = "ru")
     parser.add_argument(      "--type",     action = "store",      help = "type of lesson: ad - adult, ay - youth", default = "ad")
+    parser.add_argument("--test",   action = "store_true", default=False)
     args = parser.parse_args()
 
     # check year, first Sabbath school lesson dated by 1852 year
@@ -921,60 +988,68 @@ if __name__ == '__main__':
     devotions.set_year(lesson_year)
     devotions.set_lang_code(args.lang)
     devotions.set_lesson_type(args.type)
-    if (args.list):
-        #get quarters list and print, do not modify or create database file
-        devotions.SS_year_inst.get_quarters_list()
+    get_list_of_1st_digit_book = get_list_of_1st_digit_book(args.lang)
+    if (args.test):
+        print("test")
+        #print(get_list_of_1st_digit_book)
+        inp_tag = "Ps. 119:105, 2 Tim. 3:16"
+        inp_tag = add_sepators_to_refs_in_Eng(inp_tag)
+        print(inp_tag)
     else:
-        if(args.append):
-            # selected option of appending new quarters to existing database
-            
-            # try to open file as database
-            if (devotions.connect_to_db(args.db_file) > 0):
-                # get list of available quarters from server
-                devotions.SS_year_inst.get_quarters_list()
-                # check if new quarters are available?
-                if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
-                    print("nothing to add")
+        if (args.list):
+            #get quarters list and print, do not modify or create database file
+            devotions.SS_year_inst.get_quarters_list()
+        else:
+            if(args.append):
+                # selected option of appending new quarters to existing database
+                
+                # try to open file as database
+                if (devotions.connect_to_db(args.db_file) > 0):
+                    # get list of available quarters from server
+                    devotions.SS_year_inst.get_quarters_list()
+                    # check if new quarters are available?
+                    if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
+                        print("nothing to add")
+                    else:
+                        # remove from list the quarters which are already in database
+                        for i in range(0, devotions.db_end_quart):
+                            devotions.SS_year_inst.quarters_list_year.pop(0)
+                        print ("list of quarters to add")
+                        # print quarters which will be added
+                        for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
+                            print(i_quarter.get('id'))
+                        #get quarters
+                        print ("-- get content --")
+                        devotions.SS_year_inst.get_content()
+                        #append quarters
+                        print ("-- update_description() --")
+                        devotions.update_description()
+                        print ("-- update_detailed_info() --")
+                        devotions.update_detailed_info()
+                        print ("-- create_table_devotions --")
+                        devotions.create_table_devotions()
                 else:
-                    # remove from list the quarters which are already in database
-                    for i in range(0, devotions.db_end_quart):
-                        devotions.SS_year_inst.quarters_list_year.pop(0)
+                    print("unable to open file with database {0}".format(args.db_file))
+            else:
+                # create file with database
+                if(devotions.create_db(args.db_file) > 0):
+                    # get list of available quarters
+                    devotions.SS_year_inst.get_quarters_list()
                     print ("list of quarters to add")
-                    # print quarters which will be added
+                    # print quarters to add
                     for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
                         print(i_quarter.get('id'))
-                    #get quarters
+                    # get content of quarters
                     print ("-- get content --")
                     devotions.SS_year_inst.get_content()
-                    #append quarters
-                    print ("-- update_description() --")
-                    devotions.update_description()
-                    print ("-- update_detailed_info() --")
-                    devotions.update_detailed_info()
+                    # create table with info in database file
+                    print ("-- create_table_info --")
+                    devotions.create_table_info()
+                    # create table with devotions in database file
                     print ("-- create_table_devotions --")
                     devotions.create_table_devotions()
-            else:
-                print("unable to open file with database {0}".format(args.db_file))
-        else:
-            # create file with database
-            if(devotions.create_db(args.db_file) > 0):
-                # get list of available quarters
-                devotions.SS_year_inst.get_quarters_list()
-                print ("list of quarters to add")
-                # print quarters to add
-                for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
-                    print(i_quarter.get('id'))
-                # get content of quarters
-                print ("-- get content --")
-                devotions.SS_year_inst.get_content()
-                # create table with info in database file
-                print ("-- create_table_info --")
-                devotions.create_table_info()
-                # create table with devotions in database file
-                print ("-- create_table_devotions --")
-                devotions.create_table_devotions()
-            else:
-                print("Error: unable to create database {0}".format(args.db_file))
+                else:
+                    print("Error: unable to create database {0}".format(args.db_file))
             
     # usefull links
     #https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-01/lessons/07/days/01/read/index.json
