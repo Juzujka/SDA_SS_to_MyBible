@@ -692,6 +692,7 @@ class db_MyBible_devotions_SS:
         return  description_text
     def get_db_detailed_info_text(self):
         """ returns detailed info in selected languages """
+        #TODO: add list of quarters from the beginning of the year to the current quarter
         themes_list = "<p> {0} </p>".format(internat.list_of_quarterly_themes[self.lang_code])
         for quarter in self.SS_year_inst.quarters:
             themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
@@ -820,27 +821,14 @@ class db_MyBible_devotions_SS:
     def __del__(self):
         self.close_db()
 
-def get_list_of_1st_digit_book(lang_code = 'en'):
-    dict_of_1st_digit_book = {}
-    for i, (key, val) in enumerate(bible_codes.book_index_to_MyBible[lang_code].items()):
-        if (key[0].isdigit()):
-            """if (val in dict_of_1st_digit_book.values()):
-                for i2, (key2, val2) in enumerate(dict_of_1st_digit_book.items()):
-                    if val == val2:
-                        if len(key) < len(key2):
-                            dict_of_1st_digit_book.pop(key2)
-                            dict_of_1st_digit_book[key] = val
-            else:"""
-            dict_of_1st_digit_book[key] = val
-    return dict_of_1st_digit_book
-                        
-            
-    
-
-def add_sepators_to_refs_in_Eng(inp_tag_text):
+def ref_tag_preprocess_en(inp_tag_text):
     """references in lessons in English is very specific
     this function adopts references"""
     
+    # some words in references
+    inp_tag_text = inp_tag_text.replace("see also", " ")
+    # long book name for Song of Solomon
+    inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
     # find books with names starts with digit, add separator ';' before book name
     # because of references divided with commas, it is difficult to separate book name from previous reference
     # this part of code search every name starting from digit in reference
@@ -862,10 +850,16 @@ def add_sepators_to_refs_in_Eng(inp_tag_text):
         inp_tag_text = inp_tag_text.replace(",&", " &")
         # next is replacing '&' with ';'
         inp_tag_text = inp_tag_text.replace("&", "; ")
-        # some words in references
-        inp_tag_text = inp_tag_text.replace("see also", " ")
-        # long book name for Song of Solomon
-        inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
+    return inp_tag_text
+
+def ref_tag_preprocess_ru(inp_tag_text):
+    """adopting references in lessons in Russian"""
+    
+    # some words in references
+    inp_tag_text = inp_tag_text.replace("see also", " ")
+    # long book name for Song of Solomon
+    inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
+    inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     return inp_tag_text
 
 def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
@@ -885,7 +879,10 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
     if (lang_code == 'en'):
-        inp_tag_text = add_sepators_to_refs_in_Eng(inp_tag_text)
+        inp_tag_text = ref_tag_preprocess_en(inp_tag_text)
+    if (lang_code == 'ru'):
+        inp_tag_text = ref_tag_preprocess_ru(inp_tag_text)
+    ref_tag_preprocess_ru
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace(" і ", "; ")
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
@@ -910,7 +907,10 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         book_name_parse_ref = parse_ref.match(ref)
         book_name_parse_ref_group = book_name_parse_ref.group()
         book_name = book_name_parse_ref_group.replace(" ", "")
-        book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name)
+        book_name_as_list = list(book_name)
+        book_name_as_list[0] = book_name_as_list[0].upper()
+        book_name_to_find = "".join(book_name_as_list)
+        book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name_to_find)
         if (book_N == None):
             print("! referense not recognised, refs : {0} ; ref {1}; book name {2}".format(refs, ref, book_name))
             #print("doc: {0}".format(doc))
@@ -988,12 +988,11 @@ if __name__ == '__main__':
     devotions.set_year(lesson_year)
     devotions.set_lang_code(args.lang)
     devotions.set_lesson_type(args.type)
-    get_list_of_1st_digit_book = get_list_of_1st_digit_book(args.lang)
     if (args.test):
         print("test")
         #print(get_list_of_1st_digit_book)
         inp_tag = "Ps. 119:105, 2 Tim. 3:16"
-        inp_tag = add_sepators_to_refs_in_Eng(inp_tag)
+        inp_tag = ref_tag_preprocess_en(inp_tag)
         print(inp_tag)
     else:
         if (args.list):
