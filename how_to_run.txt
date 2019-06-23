@@ -6,3 +6,9 @@ sqlitebrowser ./SDA_SS_2018_2_ru.devotions.sqlite3
 
 ./SDA_SS_to_MyBible_devotions.py --year 2019 --lang ru
 ./SDA_SS_to_MyBible_devotions.py --year 2019 --lang ru --type ay
+
+Links for tests
+
+https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-02/lessons/02/days/01/read/index.json
+
+./SDA_SS_to_MyBible_devotions.py --year 2019 --lang ru --test_print_day --test_n_quart 2 --test_n_less 11 --test_n_day 1
