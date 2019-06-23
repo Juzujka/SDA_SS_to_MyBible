@@ -871,20 +871,6 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # regular expression for selecting reference to book name with verses in particular book
                             #   /  book name                                         \ /    head, verse repeatable after selected book name                                                                                    \ 
     find_refs = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\,\s*)?)*")
-    #find_refs = regex.compile("(?:\d\s*)?(?:[A-Z][a-z]*\.)?(?:\s)?(?:[A-Z]?[a-z\’\']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[A-Z]?[a-z\’\']+\s*\d+\:\d+))?(?:\,\s*)?)*")
-    #regex_no_unicode = "(?:\d\s*)?(?:[A-Z]*[a-z]*\.?)?(?:\s)?(?:[A-Z]?[a-z\’\']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[A-Z]?[a-z\’\']+\s*\d+\:\d+))?(?:\,\s*)?)*(?:\s)*([\;$])"
-    #regex_unicode = regex_no_unicode.replace("A-Z", "\p{Lu}")
-    #regex_unicode = regex_unicode.replace("a-z", "\p{Ll}")
-    #regex_unicode = regex_no_unicode.replace("A-Z", "\w")
-    #regex_unicode = regex_unicode.replace("a-z", "\w")
-    #regex_unicode = "(?:\d\s*)*(?:[\w]*\.?)?(?:\s)?(?:[\w]?[\w\’']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[\w]?[\w\’']+\s*\d+\:\d+))?(?:\,\s*)?)*(?:\s)*([\;$])"
-    #regex_unicode = r"(?:\d\s*)?(?:[\w]*\.)?(?:\s)?(?:[\w]?[\w\’\']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[\w]?[a-z\’\']+\s*\d+\:\d+))?(?:\,\s*)?)*(?:\s)*([\;$])"
-    #regex_unicode = r"(?:\d\s*)?(?:[\w]*\.)?(?:\s)?(?:[\w]?[\w\’\']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[\w]?[a-z\’\']+\s*\d+\:\d+))?(?:\,\s*)?)*"
-    #regex_unicode = r"(?:\d\s*)?(?:[\w]*\.)?(?:\s)?(?:[\w]?[\w\’\']?\.?)(?:\s*)(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?:\:\d+|(?:\s*[\w]?[a-z\’\']+\s*\d+\:\d+))?(?:\,\s*)?)*(?:\s*)*([;])"
-    #print("regex string")
-    #print(regex_unicode)
-    #find_refs = regex.compile(regex_unicode)
-    #find_refs = regex.compile(r"(((?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+\.)\s*)?(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\,\s*)?)*")
 
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
@@ -908,25 +894,25 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # replacing "'" to "’", it is similar in Ukrainian
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text + ";"
-    #print("inp_tag_text")
-    #print(inp_tag_text)
+    #split references into list of references to add book names to references without book name
     inp_tag_list = inp_tag_text.split(";")
-    inp_tag_text = ""
+    # initializes variables
+    inp_tag_text = ""   # text will be rewrote
     book_name = "-"
-    for i_elem in range (0, len(inp_tag_list)):
-        end_alpha_n = -1
-        elem_not_empty = False
-        for (i_lett) in range(0, len(inp_tag_list[i_elem])):
-            if (inp_tag_list[i_elem][i_lett].isalpha() or inp_tag_list[i_elem][i_lett] == "."):
-                end_alpha_n = i_lett
-            if (inp_tag_list[i_elem][i_lett].isalpha() or inp_tag_list[i_elem][i_lett].isdigit()):
-                elem_not_empty = True
-        if (elem_not_empty):
-            if end_alpha_n > 0 : # here is book name
-                book_name = inp_tag_list[i_elem][0:end_alpha_n + 1]
-            else:
-                inp_tag_list[i_elem] = book_name + inp_tag_list[i_elem]
-            inp_tag_text = inp_tag_text + ";" + inp_tag_list[i_elem]
+    for i_elem in range (0, len(inp_tag_list)):     # enumerates elements in list of references
+        end_alpha_n = -1            # here will be stored end of part with letters is the end of book name
+        elem_not_empty = False      # here will be stored mark of emptiness of element for skipping empty elements
+        for (i_lett) in range(0, len(inp_tag_list[i_elem])):            # enumerates letters in reference
+            if (inp_tag_list[i_elem][i_lett].isalpha() or inp_tag_list[i_elem][i_lett] == "."): # is it part of book name?
+                end_alpha_n = i_lett                                                            # moves position of the end of book name
+            if (not(elem_not_empty) and (inp_tag_list[i_elem][i_lett].isalpha() or inp_tag_list[i_elem][i_lett].isdigit())):
+                elem_not_empty = True                                                           # marks element as not empty
+        if (elem_not_empty):                                            # handles not empty element
+            if end_alpha_n > 0 :                                        # here is book name
+                book_name = inp_tag_list[i_elem][0:end_alpha_n + 1]     # remembers it for possible using for next reference
+            else:                                                       # here is no book name
+                inp_tag_list[i_elem] = book_name + inp_tag_list[i_elem] # add book name from previous reference with book name
+            inp_tag_text = inp_tag_text + ";" + inp_tag_list[i_elem]    # add not empty element to the end of the string with references
     # collect to refs all references to Bible texts
     refs = find_refs.findall(inp_tag_text)
     if (DEBUG_LEVEL > 0):
@@ -935,8 +921,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         print(" * references: *")
 
     # insert ";" between references, do not insert in the end
-    is_last_ref = True  #mark: it is the end reference, beginning from the end 
-    curr_book_for_next_ref = "" # stores book name for references where one book name followed by number of head:verse references
+    is_last_ref = True          #mark: it is the end reference, beginning from the end 
+
     book_name = "" 
     # process references from end to beginning
     # to not to process result of processing
@@ -958,47 +944,67 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
-        # if numeric part includes list of verses separated by commas then divide into list of references
-        numeric_part_list = numeric_part.split(",")
+        # if numeric part includes list of verses separated by commas like "Mt. 1:2-4, 5, 7, 9" then divide into list of references
+        numeric_part_list = numeric_part.split(",")                 # divides reference into parts
         numeric_part_list = list(filter(None, numeric_part_list))   # removes empty strings from list
         # convert consecutive number into range
-        to_continue = len(numeric_part_list) > 1
-        ind = 0
+        to_continue = len(numeric_part_list) > 1    # initializes mark to continue by checking after current element there is one or more elements
+        ind = 0                                     # index of the current element
         while(to_continue):
-            if (numeric_part_list[ind]) == "":
-                del numeric_part_list[ind]
+            repeat_index = False                    # if found incorrect part then deletes it and repeat without it
+            if (numeric_part_list[ind]) == "":      # checks if it is empty element
+                del numeric_part_list[ind]          # deletes empty element
             else:
-                if (numeric_part_list[ind].find(":") >= 0):
-                    verse_part = numeric_part_list[ind].split(":")[1]
+                if (numeric_part_list[ind].find(":") >= 0):             # checks is it element with head number
+                    verse_part = numeric_part_list[ind].split(":")[1]   # if it is then remembers part with verses, it is after ":"
                 else:
-                    verse_part = numeric_part_list[ind]
-                if (verse_part.find("-") >= 0): # element is range
-                    range_end_number = int(verse_part.split("-")[1])
-                else:
-                    range_end_number = int(verse_part)
-                if (ind < len(numeric_part_list) - 1):  # current element is not the last element
-                    if (numeric_part_list[ind + 1].find("-") >= 0 or numeric_part_list[ind + 1].find(":") >= 0): # next element is range or in new head, skip
-                        pass
+                    verse_part = numeric_part_list[ind]                 # else all element is verses
+                try:
+                    if (verse_part.find("-") >= 0):                         # checks element is range
+                        range_end_number = int(verse_part.split("-")[1])    # if it is then remembers end of range, it will be used to concatenating with next verses
                     else:
-                        if (int(numeric_part_list[ind + 1]) == (range_end_number + 1)):
-                            if (numeric_part_list[ind].find("-") >= 0): # element is range
-                                numeric_part_list[ind] = numeric_part_list[ind].split("-") + "-" + numeric_part_list[ind + 1]
-                            else:
-                                numeric_part_list[ind] = numeric_part_list[ind] + "-" + numeric_part_list[ind + 1]
-                            del numeric_part_list[ind + 1]
-            if (ind < len(numeric_part_list) - 1):
-                ind = ind + 1
+                        range_end_number = int(verse_part)                  # if it is not range, then it is a single verse and it is the end of range itself
+                except ValueError:
+                    print("incorrect verse found while handling {0}".format(inp_tag))   # print error message and diagnostic information
+                    print("reference is {0}".format(ref))
+                    print("numeric part is {0}; verse part is not integer: {1}".format(numeric_part_list[ind], verse_part))
+                    del numeric_part_list[ind]                              # deletes incorrect element
+                    repeat_index = True
+                if not(repeat_index):
+                    if (ind < len(numeric_part_list) - 1):  # current element is not the last element
+                        if (numeric_part_list[ind + 1].find("-") >= 0 or numeric_part_list[ind + 1].find(":") >= 0): # next element is range or in new head, skip
+                            pass
+                        else:
+                            try:
+                                numeric_part_next_value = int(numeric_part_list[ind + 1])
+                            except ValueError:
+                                print("incorrect verse found while handling {0}".format(inp_tag))   # print error message and diagnostic information
+                                print("reference is {0}".format(ref))
+                                print("numeric part in next element branch is {0}".format(numeric_part_list[ind + 1]))
+                                del numeric_part_list[ind + 1]                              # deletes incorrect element
+                                repeat_index = True
+                            if not(repeat_index):
+                                if (numeric_part_next_value == (range_end_number + 1)):
+                                    if (numeric_part_list[ind].find("-") >= 0): # element is range
+                                        numeric_part_list[ind] = numeric_part_list[ind].split("-") + "-" + numeric_part_list[ind + 1]
+                                    else:
+                                        numeric_part_list[ind] = numeric_part_list[ind] + "-" + numeric_part_list[ind + 1]
+                                    del numeric_part_list[ind + 1]
+            if (ind < len(numeric_part_list) - 1):  # checks if it is element after current element
+                if not(repeat_index):               # if element deleted then keep current value of index, it points to the next element
+                    ind = ind + 1                   # increment index for handling the next element 
             else:
-                to_continue = False
+                to_continue = False                 # if it is the last element then finishes
     
                         
         # and add head numbers to verses
-        head_number = ""
-        for i1, numeric_part_elem in enumerate(numeric_part_list) :
-            if (numeric_part_elem.find(":") >= 0): # element considers head number
-                head_number = numeric_part_elem.split(":")[0]
-            else :
-                numeric_part_list[i1] = head_number + ":" + numeric_part_elem
+        if len(numeric_part_list) > 1: # if it is a reference with heads only then skip
+            head_number = ""
+            for i1, numeric_part_elem in enumerate(numeric_part_list) :
+                if (numeric_part_elem.find(":") >= 0):                      # element considers head number
+                    head_number = numeric_part_elem.split(":")[0]           # remembers head number
+                else :
+                    numeric_part_list[i1] = head_number + ":" + numeric_part_elem   # add head number if there is no head number
             
         # concatenate reference from reference header "B:",
         # book number and head number with verse number
@@ -1086,14 +1092,6 @@ if __name__ == '__main__':
     else:
         if (args.test_print_day) :
             print("test print day")
-            devotions.SS_year_inst.get_quarters_list()
-            devotions.SS_year_inst.quarters.append(quarter())
-            # sets parameters of the quarter: year and the quarter number, 
-            devotions.SS_year_inst.quarters[-1].set_quarter(args.year, args.test_n_quart)
-            # sets language
-            devotions.SS_year_inst.quarters[-1].set_lang_code(args.lang)
-            # sets lesson type
-            devotions.SS_year_inst.quarters[-1].set_lesson_type(args.type)
             # sends requests chain to get content of each day
             #devotions.SS_year_inst.quarters[-1].get_content()
             lesson_type_string = ""
