@@ -26,11 +26,13 @@ class internat:
         "en":"Seventh-day Adventist Church`s Sabbath School lessons",\
         "ru":"Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня",\
         "uk":"Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня",\
+        "es":"Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día",\
         }
     db_info_description_version_adult = {\
         "en":"for adults",\
         "ru":"для взрослых",\
         "uk":"для дорослих",\
+        "es":"para adultos",\
         }
     db_info_description_version_youth = {\
         "en":"for youth",\
@@ -41,6 +43,7 @@ class internat:
         "en":"List of quarterly themes:",\
         "ru":"Список тем кварталов:",\
         "uk":"Список тем кварталів:",\
+        "es":"Lista de temas trimestrales",\
         }
     from_author = {\
         "en":"""To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com.""",\
@@ -56,11 +59,13 @@ class internat:
         "en":"lesson",\
         "ru":"урок",\
         "uk":"урок",\
+        "es":"la lección",\
         }
     day = {\
         "en":"day",\
         "ru":"день",\
         "uk":"день",\
+        "es":"el dia",\
         }
      
 
@@ -681,7 +686,11 @@ class db_MyBible_devotions_SS:
         # default value is English
         # sets header of devotion
         # sets description of type of lesson
-        name_text = internat.db_info_description[self.lang_code]
+        name_text = internat.db_info_description["en"]
+        try:
+            name_text = internat.db_info_description[self.lang_code]
+        except Exception:
+            print("unable to get internat.db_info_description for " + self.lang_code)
         if (self.lesson_type == 'ad'):
             version_text = internat.db_info_description_version_adult[self.lang_code]
         else:
@@ -697,13 +706,21 @@ class db_MyBible_devotions_SS:
         themes_list = "<p> {0} </p>".format(internat.list_of_quarterly_themes[self.lang_code])
         for quarter in self.SS_year_inst.quarters:
             themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
-        from_author_of_module_text = internat.from_author[self.lang_code]
+        from_author_of_module_text = internat.from_author['en']
+        try:
+            from_author_of_module_text = internat.from_author[self.lang_code]
+        except Exception:
+            print("unable to get internat.from_author for " + self.lang_code)
         detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
         return detailed_info_text
     def create_table_info(self):
         """ creates table 'info' for the MyBible devotion database"""
         ret_val = 0
-        origin_text = internat.origin_text[self.lang_code]
+        origin_text = internat.origin_text["en"]
+        try:
+            origin_text = internat.origin_text[self.lang_code]
+        except Exception:
+            print("unable to find internat.origin_text for " + self.lang_code)
         history_of_changes_text = "2018-06-30 - created"
         language_text = "{0}".format(self.lang_code)
         detailed_info_text = ""
@@ -894,6 +911,9 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     inp_tag_text = inp_tag_text.replace("to", "-")
     # replacing "'" to "’", it is similar in Ukrainian
     inp_tag_text = inp_tag_text.replace("'", "’")
+    if (lang_code == "es"):
+        inp_tag_text = inp_tag_text.replace(" y ", ",")
+        inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = inp_tag_text + ";"
     #split references into list of references to add book names to references without book name
     inp_tag_list = inp_tag_text.split(";")
