@@ -891,6 +891,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
     inp_tag_text = inp_tag_text.replace(" und ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
+    inp_tag_text = inp_tag_text.replace("to", "-")
     # replacing "'" to "’", it is similar in Ukrainian
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text + ";"
