@@ -132,6 +132,7 @@ book_index_to_MyBible['uk'] = dict([\
 ('Єздр',150),\
 ('Езд',150),\
 ('Ездр',150),\
+('Ездри',150),\
 ('Неєм',160),\
 ('Неем',160),\
 ('Ест',190),\
@@ -149,6 +150,7 @@ book_index_to_MyBible['uk'] = dict([\
 ('Пл.Єр',310),\
 ('Єзек',330),\
 ('Дан',340),\
+('Даниїла',340),\
 ('Осії',350),\
 ('Йоїла',360),\
 ('Йоіла',360),\
@@ -222,8 +224,10 @@ book_index_to_MyBible['en'] = dict([\
 ('2Sam',100),\
 ('2Samuel',100),\
 ('1Kin',110),\
+('1King',110),\
 ('1Kings',110),\
 ('2Kin',120),\
+('2King',120),\
 ('2Kings',120),\
 ('1Chr',130),\
 ('1Chron',130),\
@@ -234,6 +238,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Ezr',150),\
 ('Ezra',150),\
 ('Neh',160),\
+('Nehemiah',160),\
 ('Esth',190),\
 ('Esther',190),\
 ('Job',220),\
@@ -274,6 +279,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Zeph',430),\
 ('Zephaniah',430),\
 ('Hag',440),\
+('Haggai',440),\
 ('Zech',450),\
 ('Zechariah',450),\
 ('Mal',460),\
@@ -363,7 +369,9 @@ book_index_to_MyBible['es'] = dict([\
 ('2Crónicas',140),\
 ('2Crón',130),\
 ('Esdras',150),\
+('Esd',150),\
 ('Nehemías',160),\
+('Neh',160),\
 ('Ester',190),\
 ('Est',190),\
 ('Job',220),\
@@ -383,6 +391,7 @@ book_index_to_MyBible['es'] = dict([\
 ('Jer',300),\
 ('Lam',310),\
 ('Lamentaciones',310),\
+('La',310),\
 ('Ezequiel',330),\
 ('Eze',330),\
 ('Dan',340),\

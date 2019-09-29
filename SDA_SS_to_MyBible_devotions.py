@@ -884,6 +884,14 @@ def ref_tag_preprocess_ru(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     return inp_tag_text
 
+def ref_tag_preprocess_uk(inp_tag_text):
+    """adopting references in lessons in Ukrainian"""
+    
+    # some words in references
+    inp_tag_text = inp_tag_text.replace("до римлян", "Римл")
+    return inp_tag_text
+
+
 def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     """ find bible references and convert to MyBible format"""
 
@@ -904,7 +912,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         inp_tag_text = ref_tag_preprocess_en(inp_tag_text)
     if (lang_code == 'ru'):
         inp_tag_text = ref_tag_preprocess_ru(inp_tag_text)
-    ref_tag_preprocess_ru
+    if (lang_code == 'uk'):
+        inp_tag_text = ref_tag_preprocess_uk(inp_tag_text)
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace(" і ", "; ")
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
