@@ -794,9 +794,9 @@ class db_MyBible_devotions_SS:
         # the day after the last day in the database is the first day of current quarter
         # set days_counter to number of the last day in the database plus 1
         days_counter = self.db_last_day + 1
-        lesson_counter = 1
         print("the number of the quarters is {0}".format(len(self.SS_year_inst.quarters)))
         for quarter in self.SS_year_inst.quarters:
+            lesson_counter = 1
             print("the length of the lesson_set array is {0}".format(len(quarter.lessons_set)))
             for lesson in quarter.lessons_set:
                 print("lesson N {0:2} - {1:2}".format(lesson_counter, lesson.lesson_N))
@@ -882,6 +882,8 @@ def ref_tag_preprocess_ru(inp_tag_text):
     # long book name for Song of Solomon
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
+    inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
+    inp_tag_text = inp_tag_text.lower().replace("к римлянам", "Рим.")
     return inp_tag_text
 
 def ref_tag_preprocess_uk(inp_tag_text):
@@ -967,7 +969,10 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         book_name_parse_ref_group = book_name_parse_ref.group()
         book_name = book_name_parse_ref_group.replace(" ", "")
         book_name_as_list = list(book_name)
-        book_name_as_list[0] = book_name_as_list[0].upper()
+        if (book_name_as_list[0].isdigit()):
+            book_name_as_list[1] = book_name_as_list[1].upper()
+        else:
+            book_name_as_list[0] = book_name_as_list[0].upper()
         book_name_to_find = "".join(book_name_as_list)
         book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name_to_find)
         if (book_N == None):
