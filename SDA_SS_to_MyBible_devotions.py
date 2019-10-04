@@ -883,7 +883,8 @@ def ref_tag_preprocess_ru(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
-    inp_tag_text = inp_tag_text.lower().replace("к римлянам", "Рим.")
+    inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
+    inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
     return inp_tag_text
 
 def ref_tag_preprocess_uk(inp_tag_text):
