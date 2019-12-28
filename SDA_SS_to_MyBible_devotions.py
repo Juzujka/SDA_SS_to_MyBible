@@ -445,7 +445,7 @@ class SS_year:
     
     """
     # array of records of the quarter in xml response from adventech.io
-    quarters_list_year = []
+    #quarters_list_year = []
     # array of the quarter objects
     quarters = []
     site = "https://sabbath-school.adventech.io"
@@ -467,13 +467,13 @@ class SS_year:
         self.lesson_type = lesson_type
     def set_year(self, year):
         self.year = year
-    def get_quarters_list(self):
+    def quarters_list_get(self):
         """ gets a list of quarters from the server """
         self.quarters_list_year = []
         # creates request to adventech.io from attributes
         request_str = ("{0}/api/v1/{1}/quarterlies/index.json")\
             .format(self.site, self.lang_code, self.year)
-        print("get_quarters_list with {0}".format(request_str))
+        print("quarters_list_get with {0}".format(request_str))
         # sends request to the server
         r = requests.get(request_str)
         # selects quarters for the year and appends it to the quarters array
@@ -669,7 +669,7 @@ class db_MyBible_devotions_SS:
         self.SS_year_inst.set_year(self.year)
         self.SS_year_inst.set_lang_code(self.lang_code)
         self.SS_year_inst.set_lesson_type(self.lesson_type)
-        self.SS_year_inst.get_quarters_list()
+        self.SS_year_inst.quarters_list_get()
     def get_content(self):
         """ sends chain of requests to get content of days """
         self.SS_year_inst.get_content()
@@ -1177,58 +1177,64 @@ if __name__ == '__main__':
         else:
             if (args.list):
                 #get quarters list and print, do not modify or create database file
-                devotions.SS_year_inst.get_quarters_list()
+                devotions.SS_year_inst.quarters_list_get()
             else:
                 if(args.append):
                     # selected option of appending new quarters to existing database
                     
-                    # try to open file as database
-                    if (devotions.connect_to_db(args.db_file) > 0):
-                        # get list of available quarters from server
-                        devotions.SS_year_inst.get_quarters_list()
-                        # check if new quarters are available?
-                        if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
-                            print("nothing to add")
+                    # get list of available quarters from server
+                    devotions.SS_year_inst.quarters_list_get()
+                    if (not(devotions.SS_year_inst.quarters_list_year == [])):
+                        # try to open file as database
+                        if (devotions.connect_to_db(args.db_file) > 0):
+                            # check if new quarters are available?
+                            if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
+                                print("nothing to add")
+                            else:
+                                # remove from list the quarters which are already in database
+                                for i in range(0, devotions.db_end_quart):
+                                    devotions.SS_year_inst.quarters_list_year.pop(0)
+                                print ("list of quarters to add")
+                                # print quarters which will be added
+                                for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
+                                    print(i_quarter.get('id'))
+                                #get quarters
+                                print ("-- get content --")
+                                devotions.SS_year_inst.get_content()
+                                #append quarters
+                                print ("-- update_description() --")
+                                devotions.update_description()
+                                print ("-- update_detailed_info() --")
+                                devotions.update_detailed_info()
+                                print ("-- create_table_devotions --")
+                                devotions.create_table_devotions()
                         else:
-                            # remove from list the quarters which are already in database
-                            for i in range(0, devotions.db_end_quart):
-                                devotions.SS_year_inst.quarters_list_year.pop(0)
+                            print("unable to open file with database {0}".format(args.db_file))
+                    else:
+                        print("no quarters for year {0} in language {1}".format(lesson_year, args.lang))
+                else:
+                    # get list of available quarters
+                    devotions.SS_year_inst.quarters_list_get()
+                    if (not(devotions.SS_year_inst.quarters_list_year == [])):
+                        # create file with database
+                        if(devotions.create_db(args.db_file) > 0):
                             print ("list of quarters to add")
-                            # print quarters which will be added
+                            # print quarters to add
                             for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
                                 print(i_quarter.get('id'))
-                            #get quarters
+                            # get content of quarters
                             print ("-- get content --")
                             devotions.SS_year_inst.get_content()
-                            #append quarters
-                            print ("-- update_description() --")
-                            devotions.update_description()
-                            print ("-- update_detailed_info() --")
-                            devotions.update_detailed_info()
+                            # create table with info in database file
+                            print ("-- create_table_info --")
+                            devotions.create_table_info()
+                            # create table with devotions in database file
                             print ("-- create_table_devotions --")
                             devotions.create_table_devotions()
+                        else:
+                            print("Error: unable to create database {0}".format(args.db_file))
                     else:
-                        print("unable to open file with database {0}".format(args.db_file))
-                else:
-                    # create file with database
-                    if(devotions.create_db(args.db_file) > 0):
-                        # get list of available quarters
-                        devotions.SS_year_inst.get_quarters_list()
-                        print ("list of quarters to add")
-                        # print quarters to add
-                        for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
-                            print(i_quarter.get('id'))
-                        # get content of quarters
-                        print ("-- get content --")
-                        devotions.SS_year_inst.get_content()
-                        # create table with info in database file
-                        print ("-- create_table_info --")
-                        devotions.create_table_info()
-                        # create table with devotions in database file
-                        print ("-- create_table_devotions --")
-                        devotions.create_table_devotions()
-                    else:
-                        print("Error: unable to create database {0}".format(args.db_file))
+                        print("no quarters for year {0} in language {1}".format(lesson_year, args.lang))
             
     # usefull links
     #https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2019-01/lessons/07/days/01/read/index.json
