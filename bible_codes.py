@@ -337,6 +337,7 @@ book_index_to_MyBible['en'] = dict([\
 ('Oba',380),\
 ('Obadiah',380),\
 ('Jona',390),\
+('Jonah',390),\
 ('Mic',400),\
 ('Micah',400),\
 ('Nah',410),\
@@ -475,6 +476,7 @@ book_index_to_MyBible['es'] = dict([\
 ('Miq',400),\
 ('Nah',410),\
 ('Nahum',410),\
+('Nahúm',410),\
 ('Hab',420),\
 ('Habacuc',420),\
 ('Sofonías',430),\
@@ -519,8 +521,10 @@ book_index_to_MyBible['es'] = dict([\
 ('Colosenses',580),\
 ('1Tes',590),\
 ('1Tesalonicenses',590),\
+('1Tesalonisenses',590),\
 ('2Tes',600),\
 ('2Tesalonicenses',600),\
+('2Tesalonisenses',600),\
 ('1Tim',610),\
 ('1Timoteo',610),\
 ('2Tim',620),\
