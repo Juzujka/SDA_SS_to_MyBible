@@ -410,6 +410,7 @@ book_index_to_MyBible['en'] = dict([\
 
 book_index_to_MyBible['es'] = dict([\
 ('Génesis',10),\
+('Genesis',10),\
 ('Gén',10),\
 ('Éxodo',20),\
 ('Éxo',20),\
@@ -454,6 +455,7 @@ book_index_to_MyBible['es'] = dict([\
 ('Cantares',260),\
 ('Cant',260),\
 ('Isaías',290),\
+('Isaias',290),\
 ('Isa',290),\
 ('Jeremías',300),\
 ('Jer',300),\

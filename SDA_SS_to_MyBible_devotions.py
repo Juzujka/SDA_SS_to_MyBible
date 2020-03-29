@@ -450,7 +450,7 @@ class SS_year:
     quarters = []
     site = "https://sabbath-school.adventech.io"
     lang_code = "ru"
-    lesson_type = 'ad'
+    lesson_type = ''
     quarters_list_year = []
     def set_lang_code(self, lang):
         self.lang_code = lang
@@ -467,9 +467,11 @@ class SS_year:
         self.lesson_type = lesson_type
     def set_year(self, year):
         self.year = year
+
     def quarters_list_get(self):
         """ gets a list of quarters from the server """
         self.quarters_list_year = []
+        self.quarters_list_titles_all_available_for_year = []
         # creates request to adventech.io from attributes
         request_str = ("{0}/api/v1/{1}/quarterlies/index.json")\
             .format(self.site, self.lang_code, self.year)
@@ -479,14 +481,24 @@ class SS_year:
         # selects quarters for the year and appends it to the quarters array
         for index, quart in enumerate(r.json()):
             quart = r.json()[index]
-            # select quarters for this year, exclude youth sabbath school to avoid repeating of quarters
+            # select quarters for this year
+            if (int(quart.get("id").split("-")[0]) == self.year):
+                #print("{0} - {1}".format(quart.get("id")[8:10], lesson_type))
+                if (quart.get("id")[8:] == self.lesson_type):
+                    #print("quart {0} {1}".format(quart.get('id'), quart.get('title')))
+                    self.quarters_list_titles_all_available_for_year.append(
+                        (quart.get('id'), quart.get('title'),
+                         quart.get('description')))
             if (int(quart.get("id").split("-")[0])
                 == self.year and len(quart.get("id").split("-")) == 2):
                 self.quarters_list_year.append(quart)
+
         print(" quarters for selected year: ")
         # sorts quarters in array by quarter number
         self.quarters_list_year.sort(key = lambda quart_rec:
                                       quart_rec.get("id").split("-")[1])
+        self.quarters_list_titles_all_available_for_year.sort(
+            key = lambda quart_rec:  quart_rec[0].split("-")[1])
         for quart in self.quarters_list_year:
             print("quarter {0}".format(quart.get("id")))
         print()
@@ -525,7 +537,7 @@ class db_MyBible_devotions_SS:
     """ database with devotions (one devotion - one year) """
     # default parameters
     lang_code = 'ru'    # language code for sabbath school text
-    lesson_type = 'ad'  # type of lesson: adult, youth etc.
+    lesson_type = ''  # type of lesson: adult, youth etc.
     SS_year_inst = SS_year()    # year class object
     year = 0
     # name of the database file
@@ -543,7 +555,7 @@ class db_MyBible_devotions_SS:
     def lesson_type_to_text_x(self):
         """ returns text description of type of the lesson """
         lesson_type_descr = "unknown"
-        if self.lesson_type == 'ad':
+        if self.lesson_type == 'ad' or self.lesson_type == '':
             lesson_type_descr = 'adult'
         if self.lesson_type == 'ay':
             lesson_type_descr = 'youth'
@@ -559,8 +571,10 @@ class db_MyBible_devotions_SS:
         self.SS_year_inst.set_year(self.year)
     def get_def_file_name(self):
         """ returns default file name of the database """
+        if (self.lesson_type == ''):
+            lesson_type_index = 'ad'
         file_name = "SS-{0}-{1}'{2}.devotions.SQLite3"\
-            .format(self.lang_code, self.lesson_type, str(self.year)[2:4])
+            .format(self.lang_code, lesson_type_index, str(self.year)[2:4])
         return file_name
     def connect_to_db(self, file_name):
         """ opens the database in file_name and checks if it is an appropriate devotions"""
@@ -693,7 +707,7 @@ class db_MyBible_devotions_SS:
             name_text = internat.db_info_description[self.lang_code]
         except Exception:
             print("unable to get internat.db_info_description for " + self.lang_code)
-        if (self.lesson_type == 'ad'):
+        if (self.lesson_type == 'ad' or self.lesson_type == ''):
             version_text = internat.db_info_description_version_adult[self.lang_code]
         else:
             if (self.lesson_type == 'ay'):
@@ -702,12 +716,15 @@ class db_MyBible_devotions_SS:
                 version_text = ""
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
         return  description_text
+        
     def get_db_detailed_info_text(self):
         """ returns detailed info in selected languages """
         #TODO: add list of quarters from the beginning of the year to the current quarter
         themes_list = "<p> {0} </p>".format(internat.list_of_quarterly_themes[self.lang_code])
-        for quarter in self.SS_year_inst.quarters:
-            themes_list = themes_list + "<h4>" + "{0}.".format(quarter.quart_N) + " " + quarter.quarter_title + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
+        #print('quarters_list_titles_all_available_for_year : {0}'.format(self.SS_year_inst.quarters_list_titles_all_available_for_year))
+        for quarter_rec in self.SS_year_inst.quarters_list_titles_all_available_for_year:
+            themes_list = themes_list + "<h4>" + "{0}.".format(int(quarter_rec[0].split("-")[1])) + " " + quarter_rec[1] + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
+        #print('themes list {0}'.format(themes_list))
         from_author_of_module_text = internat.from_author['en']
         try:
             from_author_of_module_text = internat.from_author[self.lang_code]
@@ -1100,7 +1117,7 @@ if __name__ == '__main__':
     parser.add_argument("-o", "--db_file",  help = "name of database output file", default = "")
     parser.add_argument("-l", "--list"  ,   action = "store_true", help = "get list of available quarters", default = False)
     parser.add_argument(      "--lang"  ,   action = "store",      help = "language", default = "ru")
-    parser.add_argument(      "--type"  ,   action = "store",      help = "type of lesson: ad - adult, ay - youth", default = "ad")
+    parser.add_argument(      "--type"  ,   action = "store",      help = "type of lesson", default = "")
     parser.add_argument(      "--test"  ,   action = "store_true", default=False)
     parser.add_argument( "--test_print_day"   ,   action = "store_true", help = "print selected day to console", default=False)
     parser.add_argument( "--test_n_quart" ,   type = int, help="quarter for test", default = 1)
@@ -1200,6 +1217,7 @@ if __name__ == '__main__':
                                     print(i_quarter.get('id'))
                                 #get quarters
                                 print ("-- get content --")
+                                #TODO: uncomment this
                                 devotions.SS_year_inst.get_content()
                                 #append quarters
                                 print ("-- update_description() --")
