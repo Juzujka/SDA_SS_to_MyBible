@@ -16,8 +16,6 @@ import json
 from bs4 import BeautifulSoup
 
 import bible_codes
-#from code import interact
-#from sqlalchemy.sql.expression import false
 
 DEBUG_LEVEL = 0
 
@@ -101,43 +99,32 @@ class text_material:
             two-letter code of language of a day, for example 'en', 'ru', etc.
         """
         self.lang_code = lang
+
     def content_extract(self, path_to_content: str):
-        #request_str = ("{0}/days/{1:02}/read/index.json")\
-        #    .format(self.full_path, self.day_N)
-        print("content_extract {0}".format(path_to_content))
-        #path_to_file = self.path_to_cache + self.full_path + '/' + path_to_content
+        #print("content_extract {0}".format(path_to_content))
         path_local = path_to_content
         # remove https from root directory name 
         if path_local.startswith("https://") :
             path_local = path_local[len("https://"):]
-        #path_to_file = self.path_to_cache + path_local + '/' + path_to_content
+        # concatenate path to cache and path to extracted file within the cache
         path_to_file = self.path_to_cache + '/' + path_local
+        # check if file already exists in the cache ?
         if (os.path.isfile(path_to_file)):
+            # if file already exist then read from the local file
             with open(path_to_file) as inp_file:
                 self.r_json = json.load(inp_file)
-                #self.content = r_json.get('content')
-                #self.day_date = datetime.datetime.strptime(r_json.get('date'),
-                #                                        "%d/%m/%Y")
-                # extract title from xml and save to attribute
-                #self.title = r_json.get('title')
-                
         else:
-            #request_str = ("{0}/{1}").format(self.full_path, path_to_content)
+            # get data and safe to the local file
             request_str = (path_to_content)
             # send request and get xml  with day of lesson with its attributes
             r = requests.get(request_str)
-            #print('***request')
-            #print(type(r))
-            #print(r)
-            #print(r.json())
             # extract content, date and title
             folder_path = os.path.dirname(path_to_file)
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
-                print("Directory " , folder_path ,  " Created ")
+                #print("Directory " , folder_path ,  " Created ")
             out_file = open(path_to_file, 'w')
             json.dump(r.json(), out_file)
-            #out_file.write(r.json())
             out_file.close()
             self.r_json = r.json()
 
@@ -179,32 +166,6 @@ class day(text_material):
     """
     
 
-    '''def __init__(self):
-        # number of a day in a lesson
-        self.day_N = 0
-        # date of a day
-        self.day_date = 0
-        # web link of a day
-        self.full_path = ""
-        # xml content of a day, text with attached information
-        self.content = ""
-        # title of material for a day
-        self.title = ""
-        # language code of a day
-        self.lang_code = "ru"
-        # path to local storage of content
-        self.path_to_cache = "./"
-    def set_lang_code(self, lang):
-        """
-        sets language for the day.
-
-        Parameters
-        ----------
-        lang: str
-            two-letter code of language of a day, for example 'en', 'ru', etc.
-        """
-        self.lang_code = lang
-    '''
     def get_content(self, full_path: str, day_N: int):
         """get reading for day
 
@@ -232,21 +193,7 @@ class day(text_material):
         # extract title from xml and save to attribute
         self.title = self.r_json.get('title')
         # create a link for request by adding tail with link to day to the lesson
-        '''request_str = ("{0}/days/{1:02}/read/index.json")\
-            .format(self.full_path, self.day_N)
-            
-        # send request and get xml  with day of lesson with its attributes
-        r = requests.get(request_str)
-        # extract content, date and title
-        self.content = r.json().get('content')
-        # convert content of the day into format of MyBible
-        self.content = adventech_lesson_to_MyBibe_lesson( self.content,
-                                                          self.lang_code)
-        # extract date from xml and save to attribute
-        self.day_date = datetime.datetime.strptime(r.json().get('date'),
-                                                    "%d/%m/%Y")
-        # extract title from xml and save to attribute
-        self.title = r.json().get('title')'''
+
 class comment(text_material):
     """commentaries for lesson, for sabbath schoo leaders
     
@@ -268,23 +215,7 @@ class comment(text_material):
         # set values of attributes to values of parameters passed to function
         self.full_path = full_path
         # create a link for request by adding tail with link to day to the lesson
-        #request_str = ("{0}/days/{1:02}/read/index.json")\
-        #self.content_extract("days/teacher-comments/read/index.json")
         self.content_extract(self.full_path + '/' + "days/teacher-comments/read/index.json")
-        '''request_str = ("{0}/days/teacher-comments/read/index.json")\
-            .format(self.full_path)
-        # send request and get xml  with day of lesson with its attributes
-        r = requests.get(request_str)
-        # extract content, date and title
-        self.content = r.json().get('content')
-        # convert content of the day into format of MyBible
-        self.content = adventech_lesson_to_MyBibe_lesson( self.content,
-                                                          self.lang_code)
-        # extract date from xml and save to attribute
-        self.day_date = datetime.datetime.strptime(r.json().get('date'),
-                                                    "%d/%m/%Y")
-        # extract title from xml and save to attribute
-        self.title = r.json().get('title')'''
         self.content = self.r_json.get('content')
         # convert content of the day into format of MyBible
         self.content = adventech_lesson_to_MyBibe_lesson( self.content,
@@ -320,18 +251,6 @@ class lesson(text_material):
     lang_code: str
         two-letters code of language of a day, for example 'en', 'ru', 'uk' etc.
     """
-
-    #def set_lang_code(self, lang):
-    #    """
-    #    set language for the day.
-
-    #    Parameters
-    #    ----------
-    #    lang: str
-    #        two-letter code of language of a day, for example 'en', 'ru', etc.
-    #    """
-
-    #    self.lang_code = lang
 
     def get_lesson_N(self):
         """ returns number of the lesson in the quarter """
@@ -392,29 +311,19 @@ class lesson(text_material):
             # method is called from the object placed in array of days
             # current day now is the last day in array
             self.days[-1].get_content(self.lesson_full_path, day_N)
-        # check if lesson includes commentary?
-        #request_str = ("{0}/index.json")\
-        #    .format(self.lesson_full_path)
-        # send request and get xml  with lessons attributes
-        #r = requests.get(request_str)
-        #self.content_extract("index.json")
         self.content_extract("{0}/index.json".format(self.lesson_full_path))
         # extract content, date and title
         self.lessons_info = self.r_json.get('days')
-        
-        
+
+        # check if lesson includes commentary?
+        # search for id='teacher-comments'
         for lesson_info_item in self.lessons_info:
             if lesson_info_item.get('id') == 'teacher-comments':
+                # create comment object and process comment
                 self.lesson_comment = comment()
                 self.lesson_comment.set_lang_code(self.lang_code)
                 self.lesson_comment.get_content(self.lesson_full_path)
                 break
-        pass        
-        #if (len(self.lessons_info) >= 7):
-        #    if (self.lessons_info[7].get('id') == 'teacher-comments'):
-        #        self.lesson_comment = comment()
-        #        self.lesson_comment.set_lang_code(self.lang_code)
-        #        self.lesson_comment.get_content(self.lesson_full_path)
 
     def __init__(self, lesson_block, lesson_N):
         """ create object of lesson
@@ -456,9 +365,6 @@ class quarter(text_material):
         self.year = year
         self.quart_N = quarter
         
-    #def set_lang_code(self, lang):
-    #    self.lang_code = lang
-
     def set_lesson_type(self, lesson_type):
         """ sets lesson type
         
@@ -498,9 +404,7 @@ class quarter(text_material):
                      self.quart_N, lesson_type_string)
         print("get_content by {0}".format(request_str))
         # sends request to adventech.io
-        #r = requests.get(request_str)
         self.content_extract(request_str)
-        #self.content_extract()
         # extracts from xml received in response title of lesson, description
         self.quarter_title = self.r_json.get('quarterly').get('title')
         self.quarter_description = self.r_json.get('quarterly').get('description')
@@ -577,7 +481,6 @@ class quarter(text_material):
         self.quart_N = 0
         self.lang_code = "ru"
         self.lesson_type = "ad"
-        #intro = intro()
         self.lessons_block = None
         self.lessons_set = []
         self.quarter_title = ""
@@ -589,9 +492,6 @@ class SS_year(text_material):
     """ year class (includes quarters)
     
     """
-    # array of records of the quarter in xml response from adventech.io
-    #quarters_list_year = []
-    # array of the quarter objects
     def set_lang_code(self, lang):
         self.lang_code = lang
     def set_lesson_type(self, lesson_type):
@@ -617,7 +517,6 @@ class SS_year(text_material):
             .format(self.site, self.lang_code, self.year)
         print("quarters_list_get with {0}".format(request_str))
         # sends request to the server
-        #r = requests.get(request_str)
         self.content_extract(request_str)
         # selects quarters for the year and appends it to the quarters array
         for index, quart in enumerate(self.r_json):
