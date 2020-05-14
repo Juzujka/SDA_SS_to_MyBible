@@ -12,14 +12,15 @@ import regex
 import sqlite3
 import requests
 import json
+import importlib
 
 from bs4 import BeautifulSoup
 
-import bible_codes
+#import bible_codes
 
 DEBUG_LEVEL = 0
 
-class internat:
+'''class internat:
     lang_code = 'en'
     db_info_description = {\
         "en":"Seventh-day Adventist Church`s Sabbath School lessons",\
@@ -68,7 +69,7 @@ class internat:
         "uk":"день",\
         "es":"el dia",\
         }
-     
+'''     
 
 class text_material:
     """some text material: text for the day, intro, comments
@@ -353,8 +354,6 @@ class lesson(text_material):
         self.lang_code = "ru"
         self.lesson_block = lesson_block
         self.lesson_N = lesson_N
-        self.lesson_title = ""
-        self.days = []
         
 
 class quarter(text_material):
@@ -518,13 +517,23 @@ class SS_year(text_material):
         print("quarters_list_get with {0}".format(request_str))
         # sends request to the server
         self.content_extract(request_str)
+        
+        #print('extracted')
+        #print(self.r_json)
+        #print()
         # selects quarters for the year and appends it to the quarters array
+        
+        # if lesson type is adult then replace 'ad' with empty string, because for lessons for adult ther is no suffix 
+        lesson_type_index = self.lesson_type if not(self.lesson_type == 'ad') else ''
         for index, quart in enumerate(self.r_json):
             quart = self.r_json[index]
+            #print('quart ')
+            #print(quart)
+            #print()
             # select quarters for this year
             if (int(quart.get("id").split("-")[0]) == self.year):
-                #print("{0} - {1}".format(quart.get("id")[8:10], lesson_type))
-                if (quart.get("id")[8:] == self.lesson_type):
+                #print("{0} - {1}".format(quart.get("id")[8:10], lesson_type_index))
+                if (quart.get("id")[8:] == lesson_type_index):
                     #print("quart {0} {1}".format(quart.get('id'), quart.get('title')))
                     self.quarters_list_titles_all_available_for_year.append(
                         (quart.get('id'), quart.get('title'),
@@ -574,10 +583,6 @@ class SS_year(text_material):
         self.lesson_type = ''
         self.quarters_list_year = []
         self.year = 0
-        self.site = "https://sabbath-school.adventech.io"
-        self.lang_code = "ru"
-        self.quarters_list_year = []
-        self.quarters = []
 
 class db_MyBible_devotions_SS:
     """ database with devotions (one devotion - one year) """
@@ -638,7 +643,7 @@ class db_MyBible_devotions_SS:
                         self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")
                         info_description = self.db_cursor.fetchall()
                         # checks description
-                        if (info_description[0][1].startswith(internat.db_info_description[self.lang_code])):
+                        if (info_description[0][1].startswith(bible_codes.db_info_description[self.lang_code])):
                             self.db_inp_file_is_SDA_SS_devotions = True
                             print("it is the SDA Sabbath School devotion database")
                             # finds the last quarter in the database
@@ -733,16 +738,16 @@ class db_MyBible_devotions_SS:
         # default value is English
         # sets header of devotion
         # sets description of type of lesson
-        name_text = internat.db_info_description["en"]
+        #name_text = bible_codes.db_info_description["en"]
         try:
-            name_text = internat.db_info_description[self.lang_code]
+            name_text = bible_codes.db_info_description[self.lang_code]
         except Exception:
             print("unable to get internat.db_info_description for " + self.lang_code)
         if (self.lesson_type == 'ad' or self.lesson_type == ''):
-            version_text = internat.db_info_description_version_adult[self.lang_code]
+            version_text = bible_codes.db_info_description_version_adult[self.lang_code]
         else:
             if (self.lesson_type == 'ay'):
-                version_text = version_text = internat.db_info_description_version_youth[self.lang_code]
+                version_text = version_text = bible_codes.db_info_description_version_youth[self.lang_code]
             else:
                 version_text = ""
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
@@ -751,14 +756,14 @@ class db_MyBible_devotions_SS:
     def get_db_detailed_info_text(self):
         """ returns detailed info in selected languages """
         #TODO: add list of quarters from the beginning of the year to the current quarter
-        themes_list = "<p> {0} </p>".format(internat.list_of_quarterly_themes[self.lang_code])
+        themes_list = "<p> {0} </p>".format(bible_codes.list_of_quarterly_themes[self.lang_code])
         #print('quarters_list_titles_all_available_for_year : {0}'.format(self.SS_year_inst.quarters_list_titles_all_available_for_year))
         for quarter_rec in self.SS_year_inst.quarters_list_titles_all_available_for_year:
             themes_list = themes_list + "<h4>" + "{0}.".format(int(quarter_rec[0].split("-")[1])) + " " + quarter_rec[1] + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
         #print('themes list {0}'.format(themes_list))
-        from_author_of_module_text = internat.from_author['en']
+        #from_author_of_module_text = bible_codes.from_author['en']
         try:
-            from_author_of_module_text = internat.from_author[self.lang_code]
+            from_author_of_module_text = bible_codes.from_author[self.lang_code]
         except Exception:
             print("unable to get internat.from_author for " + self.lang_code)
         detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
@@ -766,9 +771,9 @@ class db_MyBible_devotions_SS:
     def create_table_info(self):
         """ creates table 'info' for the MyBible devotion database"""
         ret_val = 0
-        origin_text = internat.origin_text["en"]
+        origin_text = bible_codes.origin_text["en"]
         try:
-            origin_text = internat.origin_text[self.lang_code]
+            origin_text = bible_codes.origin_text[self.lang_code]
         except Exception:
             print("unable to find internat.origin_text for " + self.lang_code)
         history_of_changes_text = "2018-06-30 - created"
@@ -854,7 +859,9 @@ class db_MyBible_devotions_SS:
                 days_accumulator = ""
                 for day in lesson.days:
                     # day starts from a lesson number and a header
-                    day_content_handled = "<p>  {0} № {1} {2} {3}</p> <h4>{4}</h4> {5}".format(internat.lesson[self.lang_code], str(lesson.lesson_N), internat.day[self.lang_code], str(day.day_N), day.title, day.content)
+                    day_content_handled = "<p>  {0} № {1} {2} {3}</p> <h4>{4}</h4> {5}".format(
+                        bible_codes.lesson[self.lang_code], str(lesson.lesson_N),
+                        bible_codes.day[self.lang_code], str(day.day_N), day.title, day.content)
                     if (day.day_N == 7):
                         if not(lesson.lesson_comment == None):
                             day_content_handled += "<h4>{0}</h4>{1}".format(lesson.lesson_comment.title, lesson.lesson_comment.content)
@@ -907,60 +914,6 @@ class db_MyBible_devotions_SS:
     def __del__(self):
         self.close_db()
 
-def ref_tag_preprocess_en(inp_tag_text):
-    """ function adopts references
-    references in lessons in English are specific
-    """
-    
-    # replaces "see also" with spaces
-    inp_tag_text = inp_tag_text.replace("see also", " ")
-    # replaces "Song of Solomon" with "Song"
-    inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
-    # finds books with names starts with digit, adds separator ';' before book name
-    # because of references divided with commas, it is difficult to separate book name from previous reference
-    # this part of code searches every name which starts from digit in reference
-    # and adds ';' symbol before book names was found
-
-    # enumerate all references from dictionary of book names
-    for i1, (key, val) in enumerate(bible_codes.book_index_to_MyBible['en'].items()):
-        # if it is a book name starting from digit
-        if (key[0].isdigit()):
-            # add space before and after the digit
-            templ_to_search = " " + key[0] + " " + key[1:]
-            # replace space before digit with '&',
-            # so others variants of name  of this book which whould be found
-            # will not modify this part again
-            templ_replacing = "&" + key[0] + " " + key[1:]
-            inp_tag_text = inp_tag_text.replace(templ_to_search, templ_replacing)
-        # now all digit-starting book names are separated with '&'
-        # removes comma between references
-        inp_tag_text = inp_tag_text.replace(",&", " &")
-        # next is replacing '&' with ';'
-        inp_tag_text = inp_tag_text.replace("&", "; ")
-    return inp_tag_text
-
-def ref_tag_preprocess_ru(inp_tag_text):
-    """adopting references in lessons in Russian"""
-    
-    # some words in references
-    #TODO: fix "see also"
-    inp_tag_text = inp_tag_text.replace("see also", " ")
-    # long book name for Song of Solomon
-    inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
-    inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
-    inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
-    inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
-    inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
-    return inp_tag_text
-
-def ref_tag_preprocess_uk(inp_tag_text):
-    """adopting references in lessons in Ukrainian"""
-    
-    # some words in references
-    inp_tag_text = inp_tag_text.replace("до римлян", "Римл")
-    return inp_tag_text
-
-
 def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     """ find bible references and convert to MyBible format"""
 
@@ -977,23 +930,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # replacing "and" in Russian, Ukrainian, English languages to ";"
     # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
-    if (lang_code == 'en'):
-        inp_tag_text = ref_tag_preprocess_en(inp_tag_text)
-    if (lang_code == 'ru'):
-        inp_tag_text = ref_tag_preprocess_ru(inp_tag_text)
-    if (lang_code == 'uk'):
-        inp_tag_text = ref_tag_preprocess_uk(inp_tag_text)
-    inp_tag_text = inp_tag_text.replace(" и ", "; ")
-    inp_tag_text = inp_tag_text.replace(" і ", "; ")
-    inp_tag_text = inp_tag_text.replace(" and ", "; ")
-    inp_tag_text = inp_tag_text.replace(" und ", "; ")
-    inp_tag_text = inp_tag_text.replace("–", "-")
-    inp_tag_text = inp_tag_text.replace("to", "-")
-    # replacing "'" to "’", it is similar in Ukrainian
-    inp_tag_text = inp_tag_text.replace("'", "’")
-    if (lang_code == "es"):
-        inp_tag_text = inp_tag_text.replace(" y ", ",")
-        inp_tag_text = inp_tag_text.replace(" al ", "-")
+    inp_tag_text = bible_codes.ref_tag_preprocess[lang_code](inp_tag_text)
     inp_tag_text = inp_tag_text + ";"
     #split references into list of references to add book names to references without book name
     inp_tag_list = inp_tag_text.split(";")
@@ -1187,11 +1124,14 @@ if __name__ == '__main__':
     devotions.set_year(lesson_year)
     devotions.set_lang_code(args.lang)
     devotions.set_lesson_type(args.type)
+    
+    # import language-specific functionality
+    bible_codes = importlib.import_module('lang_' + args.lang)
     if (args.test):
         print("test")
         #print(get_list_of_1st_digit_book)
         inp_tag = "Ps. 119:105, 2 Tim. 3:16"
-        inp_tag = ref_tag_preprocess_en(inp_tag)
+        inp_tag = bible_codes.ref_tag_preprocess['en'](inp_tag)
         print(inp_tag)
     else:
         if (args.test_print_day) :
