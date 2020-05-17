@@ -10,32 +10,17 @@
  Dictionaries are collected in array which indexed by language code.
 """
 
-db_info_description = {\
-    "es":"Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día",\
-    }
-db_info_description_version_adult = {\
-    "es":"para adultos",\
-    }
-db_info_description_version_youth = {\
-    }
-list_of_quarterly_themes = {\
-    "es":"Lista de temas trimestrales",\
-    }
-from_author = {\
-    "es":"""Para enviar comentarios y sugerencias sobre el módulo, use el servicio en <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Envíe agradecimientos, bendiciones, ofertas de ayuda y cooperación a juzujka@gmail.com.""",\
-    }
-origin_text = {\
-    "es":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-    }
-lesson = {\
-    "es":"la lección",\
-    }
-day = {\
-    "es":"el dia",\
-    }
+db_info_description_title = "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día"
+db_info_description_version_adult = "para adultos"
+db_info_description_version_youth = ""
+db_info_description_list_of_quarterly_themes = "Lista de temas trimestrales"
+db_info_description_from_author = """Para enviar comentarios y sugerencias sobre el módulo, use el servicio en <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Envíe agradecimientos, bendiciones, ofertas de ayuda y cooperación a juzujka@gmail.com."""
+db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
+db_info_description_lesson = "la lección"
+db_info_description_day = "el dia"
 
 
-def ref_tag_preprocess_es(inp_tag_text):
+def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Spanish"""
 
     inp_tag_text = inp_tag_text.replace("–", "-")
@@ -44,14 +29,7 @@ def ref_tag_preprocess_es(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" al ", "-")
     return inp_tag_text
 
-ref_tag_preprocess = {
-    'es':ref_tag_preprocess_es,
-     }
-
-
-book_index_to_MyBible = {}
-
-book_index_to_MyBible['es'] = dict([\
+book_index_to_MyBible = dict([\
 ('Génesis',10),\
 ('Genesis',10),\
 ('Gén',10),\

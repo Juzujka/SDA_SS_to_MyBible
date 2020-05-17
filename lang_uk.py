@@ -9,32 +9,16 @@
  
 """
 
-db_info_description = {\
-    "uk":"Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня",\
-    }
-db_info_description_version_adult = {\
-    "uk":"для дорослих",\
-    }
-db_info_description_version_youth = {\
-    "uk":"для молоді",\
-    }
-list_of_quarterly_themes = {\
-    "uk":"Список тем кварталів:",\
-    }
-from_author = {\
-    "uk":"""Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами.""",\
-    }
-origin_text = {\
-    "uk":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-    }
-lesson = {\
-    "uk":"урок",\
-    }
-day = {\
-    "uk":"день",\
-    }
+db_info_description_title = "Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня"
+db_info_description_version_adult = "для дорослих"
+db_info_description_version_youth = "для молоді"
+db_info_description_list_of_quarterly_themes = "Список тем кварталів:"
+db_info_description_from_author = """Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами."""
+db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
+db_info_description_lesson = "урок"
+db_info_description_day = "день"
 
-def ref_tag_preprocess_uk(inp_tag_text):
+def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Ukrainian"""
 
     # some words in references
@@ -46,15 +30,7 @@ def ref_tag_preprocess_uk(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("'", "’")
     return inp_tag_text
 
-
-ref_tag_preprocess = {
-    'uk':ref_tag_preprocess_uk,
-     }
-
-
-book_index_to_MyBible = {}
-
-book_index_to_MyBible['uk'] = dict([\
+book_index_to_MyBible = dict([\
 ('Бут',10),\
 ('Вих',20),\
 ('Лев',30),\

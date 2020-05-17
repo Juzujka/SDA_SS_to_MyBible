@@ -14,32 +14,16 @@
  - Ukrainian 
 """
 
-db_info_description = {
-    "ru":"Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня",
-    }
-db_info_description_version_adult = {
-    "ru":"для взрослых",
-    }
-db_info_description_version_youth = {
-    "ru":"для молодёжи",
-    }
-list_of_quarterly_themes = {
-    "ru":"Список тем кварталов:",
-    }
-from_author = {
-    "ru":"""Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com.""",
-    }
-origin_text = {
-    "ru":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",
-    }
-lesson = {
-    "ru":"урок",
-    }
-day = {
-    "ru":"день",
-    }
+db_info_description_title = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
+db_info_description_version_adult = "для взрослых"
+db_info_description_version_youth = "для молодёжи"
+db_info_description_list_of_quarterly_themes = "Список тем кварталов:"
+db_info_description_from_author = """Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com."""
+db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
+db_info_description_lesson = "урок"
+db_info_description_day = "день"
 
-def ref_tag_preprocess_ru(inp_tag_text):
+def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Russian"""
     
     # some words in references
@@ -57,14 +41,7 @@ def ref_tag_preprocess_ru(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("'", "’")
     return inp_tag_text
 
-ref_tag_preprocess = {
-    'ru':ref_tag_preprocess_ru,
-     }
-
-
-book_index_to_MyBible = {}
-
-book_index_to_MyBible['ru'] = dict([\
+book_index_to_MyBible = dict([\
 ('Быт',10),\
 ('Бытие',10),\
 ('Исх',20),\

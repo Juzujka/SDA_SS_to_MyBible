@@ -20,57 +20,6 @@ from bs4 import BeautifulSoup
 
 DEBUG_LEVEL = 0
 
-'''class internat:
-    lang_code = 'en'
-    db_info_description = {\
-        "en":"Seventh-day Adventist Church`s Sabbath School lessons",\
-        "ru":"Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня",\
-        "uk":"Посібник з вивчення Біблії в Суботній школі церкви адвентистів сьомого дня",\
-        "es":"Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día",\
-        }
-    db_info_description_version_adult = {\
-        "en":"for adults",\
-        "ru":"для взрослых",\
-        "uk":"для дорослих",\
-        "es":"para adultos",\
-        }
-    db_info_description_version_youth = {\
-        "en":"for youth",\
-        "ru":"для молодёжи",\
-        "uk":"для молоді",\
-        }
-    list_of_quarterly_themes = {\
-        "en":"List of quarterly themes:",\
-        "ru":"Список тем кварталов:",\
-        "uk":"Список тем кварталів:",\
-        "es":"Lista de temas trimestrales",\
-        }
-    from_author = {\
-        "en":"""To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com.""",\
-        "ru":"""Для отправки замечаний и пожеланий по модулю воспользуйтесь сервисом по адресу <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Благодарности, благословения, предложения о помощи и сотрудничестве присылайте на juzujka@gmail.com.""",\
-        "uk":"""Для відправки зауважень і побажань по модулю скористайтесь сервісом за адресою <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues">https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Подяки, благословення, пропозиції про допомогу і співробітництво надсилайте на juzujka@gmail.com. По можливості, пишіть російською або англійською мовами.""",\
-        "es":"""Para enviar comentarios y sugerencias sobre el módulo, use el servicio en <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Envíe agradecimientos, bendiciones, ofertas de ayuda y cooperación a juzujka@gmail.com.""",\
-        }
-    origin_text = {\
-        "en":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-        "ru":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-        "uk":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-        "es":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-        }
-    lesson = {\
-        "en":"lesson",\
-        "ru":"урок",\
-        "uk":"урок",\
-        "es":"la lección",\
-        }
-    day = {\
-        "en":"day",\
-        "ru":"день",\
-        "uk":"день",\
-        "es":"el dia",\
-        }
-'''     
-
 class text_material:
     """some text material: text for the day, intro, comments
     
@@ -518,18 +467,12 @@ class SS_year(text_material):
         # sends request to the server
         self.content_extract(request_str)
         
-        #print('extracted')
-        #print(self.r_json)
-        #print()
         # selects quarters for the year and appends it to the quarters array
         
         # if lesson type is adult then replace 'ad' with empty string, because for lessons for adult ther is no suffix 
         lesson_type_index = self.lesson_type if not(self.lesson_type == 'ad') else ''
         for index, quart in enumerate(self.r_json):
             quart = self.r_json[index]
-            #print('quart ')
-            #print(quart)
-            #print()
             # select quarters for this year
             if (int(quart.get("id").split("-")[0]) == self.year):
                 #print("{0} - {1}".format(quart.get("id")[8:10], lesson_type_index))
@@ -586,15 +529,6 @@ class SS_year(text_material):
 
 class db_MyBible_devotions_SS:
     """ database with devotions (one devotion - one year) """
-    #TODO: remove this method
-    def lesson_type_to_text_x(self):
-        """ returns text description of type of the lesson """
-        lesson_type_descr = "unknown"
-        if self.lesson_type == 'ad' or self.lesson_type == '':
-            lesson_type_descr = 'adult'
-        if self.lesson_type == 'ay':
-            lesson_type_descr = 'youth'
-        return lesson_type_descr
     def set_lang_code(self, lang):
         self.lang_code = lang
         self.SS_year_inst.set_lang_code(lang)
@@ -643,7 +577,7 @@ class db_MyBible_devotions_SS:
                         self.db_cursor.execute("SELECT * FROM info WHERE name = 'description'")
                         info_description = self.db_cursor.fetchall()
                         # checks description
-                        if (info_description[0][1].startswith(bible_codes.db_info_description[self.lang_code])):
+                        if (info_description[0][1].startswith(bible_codes.db_info_description_title)):
                             self.db_inp_file_is_SDA_SS_devotions = True
                             print("it is the SDA Sabbath School devotion database")
                             # finds the last quarter in the database
@@ -740,14 +674,14 @@ class db_MyBible_devotions_SS:
         # sets description of type of lesson
         #name_text = bible_codes.db_info_description["en"]
         try:
-            name_text = bible_codes.db_info_description[self.lang_code]
+            name_text = bible_codes.db_info_description_title
         except Exception:
             print("unable to get internat.db_info_description for " + self.lang_code)
         if (self.lesson_type == 'ad' or self.lesson_type == ''):
-            version_text = bible_codes.db_info_description_version_adult[self.lang_code]
+            version_text = bible_codes.db_info_description_version_adult
         else:
             if (self.lesson_type == 'ay'):
-                version_text = version_text = bible_codes.db_info_description_version_youth[self.lang_code]
+                version_text = version_text = bible_codes.db_info_description_version_youth
             else:
                 version_text = ""
         description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
@@ -755,15 +689,12 @@ class db_MyBible_devotions_SS:
         
     def get_db_detailed_info_text(self):
         """ returns detailed info in selected languages """
-        #TODO: add list of quarters from the beginning of the year to the current quarter
-        themes_list = "<p> {0} </p>".format(bible_codes.list_of_quarterly_themes[self.lang_code])
-        #print('quarters_list_titles_all_available_for_year : {0}'.format(self.SS_year_inst.quarters_list_titles_all_available_for_year))
+        themes_list = "<p> {0} </p>".format(bible_codes.db_info_description_list_of_quarterly_themes)
         for quarter_rec in self.SS_year_inst.quarters_list_titles_all_available_for_year:
             themes_list = themes_list + "<h4>" + "{0}.".format(int(quarter_rec[0].split("-")[1])) + " " + quarter_rec[1] + "</h4>"# + "<p>" + quarter.quarter_description + "</p>"
-        #print('themes list {0}'.format(themes_list))
         #from_author_of_module_text = bible_codes.from_author['en']
         try:
-            from_author_of_module_text = bible_codes.from_author[self.lang_code]
+            from_author_of_module_text = bible_codes.db_info_description_from_author
         except Exception:
             print("unable to get internat.from_author for " + self.lang_code)
         detailed_info_text = "{0}<br><p>{1}</p>".format(themes_list, from_author_of_module_text)
@@ -771,9 +702,9 @@ class db_MyBible_devotions_SS:
     def create_table_info(self):
         """ creates table 'info' for the MyBible devotion database"""
         ret_val = 0
-        origin_text = bible_codes.origin_text["en"]
+        origin_text = bible_codes.db_info_description_origin_text
         try:
-            origin_text = bible_codes.origin_text[self.lang_code]
+            origin_text = bible_codes.db_info_description_origin_text
         except Exception:
             print("unable to find internat.origin_text for " + self.lang_code)
         history_of_changes_text = "2018-06-30 - created"
@@ -796,7 +727,6 @@ class db_MyBible_devotions_SS:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
         exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(self.get_db_description_text())
-        #exec_string = """INSERT INTO info VALUES ( 'description', '{0}' )""".format(internat.db_info_description[self.lang_code])
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -853,15 +783,14 @@ class db_MyBible_devotions_SS:
             print("the length of the lesson_set array is {0}".format(len(quarter.lessons_set)))
             for lesson in quarter.lessons_set:
                 print("lesson N {0:2} - {1:2}".format(lesson_counter, lesson.lesson_N))
-                #print("length of the days array is {0}".format(len(lesson.days)))
                 # days_accumulator concatenates html for the current day
                 # in the beginning and in the end of the year it is possible that days are considers days of current quarter from the year before and the year after the current year 
                 days_accumulator = ""
                 for day in lesson.days:
                     # day starts from a lesson number and a header
                     day_content_handled = "<p>  {0} № {1} {2} {3}</p> <h4>{4}</h4> {5}".format(
-                        bible_codes.lesson[self.lang_code], str(lesson.lesson_N),
-                        bible_codes.day[self.lang_code], str(day.day_N), day.title, day.content)
+                        bible_codes.db_info_description_lesson, str(lesson.lesson_N),
+                        bible_codes.db_info_description_day, str(day.day_N), day.title, day.content)
                     if (day.day_N == 7):
                         if not(lesson.lesson_comment == None):
                             day_content_handled += "<h4>{0}</h4>{1}".format(lesson.lesson_comment.title, lesson.lesson_comment.content)
@@ -930,7 +859,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # replacing "and" in Russian, Ukrainian, English languages to ";"
     # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
-    inp_tag_text = bible_codes.ref_tag_preprocess[lang_code](inp_tag_text)
+    inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     inp_tag_text = inp_tag_text + ";"
     #split references into list of references to add book names to references without book name
     inp_tag_list = inp_tag_text.split(";")
@@ -978,10 +907,9 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         else:
             book_name_as_list[0] = book_name_as_list[0].upper()
         book_name_to_find = "".join(book_name_as_list)
-        book_N = bible_codes.book_index_to_MyBible[lang_code].get(book_name_to_find)
+        book_N = bible_codes.book_index_to_MyBible.get(book_name_to_find)
         if (book_N == None):
             print("! referense not recognised, refs : {0} ; ref {1}; book name {2}".format(refs, ref, book_name))
-            #print("doc: {0}".format(doc))
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
@@ -1037,7 +965,6 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
             else:
                 to_continue = False                 # if it is the last element then finishes
     
-                        
         # and add head numbers to verses
         if len(numeric_part_list) > 1: # if it is a reference with heads only then skip
             head_number = ""
@@ -1131,7 +1058,7 @@ if __name__ == '__main__':
         print("test")
         #print(get_list_of_1st_digit_book)
         inp_tag = "Ps. 119:105, 2 Tim. 3:16"
-        inp_tag = bible_codes.ref_tag_preprocess['en'](inp_tag)
+        inp_tag = bible_codes.ref_tag_preprocess(inp_tag)
         print(inp_tag)
     else:
         if (args.test_print_day) :

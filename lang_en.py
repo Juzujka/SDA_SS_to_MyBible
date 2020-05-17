@@ -14,32 +14,16 @@
  - Ukrainian 
 """
 
-db_info_description = {\
-    "en":"Seventh-day Adventist Church`s Sabbath School lessons",
-    }
-db_info_description_version_adult = {\
-    "en":"for adults",
-    }
-db_info_description_version_youth = {\
-    "en":"for youth",
-    }
-list_of_quarterly_themes = {\
-    "en":"List of quarterly themes:",
-    }
-from_author = {\
-    "en":"""To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com.""",\
-    }
-origin_text = {\
-    "en":"""created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io""",\
-    }
-lesson = {\
-    "en":"lesson",\
-    }
-day = {\
-    "en":"day",\
-    }
+db_info_description_title = "Seventh-day Adventist Church`s Sabbath School lessons"
+db_info_description_version_adult = "for adults"
+db_info_description_version_youth = "for youth"
+db_info_description_list_of_quarterly_themes = "List of quarterly themes:"
+db_info_description_from_author = """To send bugs and wishes on the module, use the service at <a href="https://github.com/Juzujka/SDA_SS_to_MyBible/issues"> https://github.com/Juzujka/SDA_SS_to_MyBible/issues </a>. Thanks, blessings, suggestions for help and cooperation send to juzujka@gmail.com."""
+db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
+db_info_description_lesson = "lesson"
+db_info_description_day = "day"
 
-def ref_tag_preprocess_en(inp_tag_text):
+def ref_tag_preprocess(inp_tag_text):
     """ function adopts references
     references in lessons in English are specific
     """
@@ -76,14 +60,7 @@ def ref_tag_preprocess_en(inp_tag_text):
     return inp_tag_text
 
 
-ref_tag_preprocess = {
-    'en':ref_tag_preprocess_en,
-     }
-
-
-book_index_to_MyBible = {}
-
-book_index_to_MyBible['en'] = dict([\
+book_index_to_MyBible = dict([\
 ('Gen',10),\
 ('Genesis',10),\
 ('Exo',20),\
