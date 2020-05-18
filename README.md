@@ -1,4 +1,4 @@
-# SDA_SS_to_MyBible
+# SDA\_SS\_to\_MyBible
 
 This project produces modules with SDA Church Sabbath School lessons for MyBible application.  
 Lessons are devotions for every day.
@@ -8,18 +8,18 @@ Lessons are devotions for every day.
 
 Download the repository
 
-'''
+```
 git clone https://github.com/Juzujka/SDA\_SS\_to\_MyBible.git
-'''
+```
 
 or download zip into the local directory.
 
 Run the command like below with desirable arguments
 
 
-'''
+```
 ./SDA\_SS\_to\_MyBible\_devotions.py --year 2020 --lang ru --type ad --append
-'''
+```
 
 arguments:
  * --year - year of Sabbath School lessons
@@ -35,7 +35,7 @@ Before using this tool must be installed
  * sqlite3 python3 package
 
 
-### About MyBible_SS
+### About SS\_to\_MyBible
 
 SDA Sabbath school is text materials for study of Bible for every day of a year  
 MyBible is Android application for reading Bible with many functions and modules, including devotions for every-day reading.  
