@@ -1,17 +1,13 @@
 #! /usr/bin/env python3
 # encoding: utf-8
 
-""" Convert book of Bible abbreviation to MyBible book of Bible number'
- 
+""" Internationalization for English
+
  This module considers dictionary of
  pairs of variants of books of Bible abbreviations
- with its number in MyBible format.
+ with its number in MyBible format, function for preprocessing references from text materials to the common format,
+ and some text for internationalization.
  
- Dictionaries are collected in array which indexed by language code.
- on 2019/03 available languages are
- - Russian
- - English
- - Ukrainian 
 """
 
 db_info_description_title = "Seventh-day Adventist Church`s Sabbath School lessons"
@@ -38,7 +34,7 @@ def ref_tag_preprocess(inp_tag_text):
     # and adds ';' symbol before book names was found
 
     # enumerate all references from dictionary of book names
-    for i1, (key, val) in enumerate(book_index_to_MyBible['en'].items()):
+    for _, (key, _) in enumerate(book_index_to_MyBible['en'].items()):
         # if it is a book name starting from digit
         if (key[0].isdigit()):
             # add space before and after the digit
@@ -56,7 +52,6 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("to", "-")
-    # replacing "'" to "’", it is similar in Ukrainian
     return inp_tag_text
 
 

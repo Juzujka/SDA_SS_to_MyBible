@@ -1,11 +1,12 @@
 #! /usr/bin/env python3
 # encoding: utf-8
 
-""" Convert book of Bible abbreviation to MyBible book of Bible number'
+""" Internationalization for Ukrainian
  
  This module considers dictionary of
  pairs of variants of books of Bible abbreviations
- with its number in MyBible format.
+ with its number in MyBible format, function for preprocessing references from text materials to the common format,
+ and some text for internationalization.
  
 """
 

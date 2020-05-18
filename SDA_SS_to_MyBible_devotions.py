@@ -73,9 +73,8 @@ class text_material:
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
                 #print("Directory " , folder_path ,  " Created ")
-            out_file = open(path_to_file, 'w')
-            json.dump(r.json(), out_file)
-            out_file.close()
+            with open(path_to_file, 'w') as out_file:
+                json.dump(r.json(), out_file)
             self.r_json = r.json()
 
     def get_content(self, block):
@@ -374,7 +373,7 @@ class quarter(text_material):
 
     def print_quarter(self):
         """ prints information about quarter, for debugging """
-        for index, lesson_item in enumerate(self.lessons_set):
+        for index, _ in enumerate(self.lessons_set):
             print("lesson_set[{0}] {1}"\
                   .format(index, self.lessons_set[index].lesson_N))
             print("lesson_set[{0}] {1}"\
@@ -583,7 +582,7 @@ class db_MyBible_devotions_SS:
                             # finds the last quarter in the database
                             self.db_cursor.execute("SELECT * FROM devotions WHERE devotion LIKE '<h3>%'")
                             devotion_quart_heads = self.db_cursor.fetchall()
-                            for index, value in enumerate(devotion_quart_heads):
+                            for _, value in enumerate(devotion_quart_heads):
                                 (self.db_end_year, self.db_end_quart) = value[1][4:10].split('-')
                                 self.db_end_year = int(self.db_end_year)
                                 self.db_end_quart = int(self.db_end_quart)
@@ -853,12 +852,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
 
-    #in texts on English references divided by commas. book 1:2 , 1 Cor sees as book1:2,1   Cor.  
-    #adding separators before names of numerated books
-    
-    # replacing "and" in Russian, Ukrainian, English languages to ";"
-    # for simplifying handling 
     inp_tag_text = inp_tag.get_text()
+    # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     inp_tag_text = inp_tag_text + ";"
     #split references into list of references to add book names to references without book name

@@ -1,17 +1,13 @@
 #! /usr/bin/env python3
 # encoding: utf-8
 
-""" Convert book of Bible abbreviation to MyBible book of Bible number'
+""" Internationalization for Russian
  
  This module considers dictionary of
  pairs of variants of books of Bible abbreviations
- with its number in MyBible format.
+ with its number in MyBible format, function for preprocessing references from text materials to the common format,
+ and some text for internationalization.
  
- Dictionaries are collected in array which indexed by language code.
- on 2019/03 available languages are
- - Russian
- - English
- - Ukrainian 
 """
 
 db_info_description_title = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
