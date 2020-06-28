@@ -26,15 +26,20 @@ def ref_tag_preprocess(inp_tag_text):
     
     # replaces "see also" with spaces
     inp_tag_text = inp_tag_text.replace("see also", " ")
+    inp_tag_text = inp_tag_text.replace(" and ", ", ")
+    inp_tag_text = inp_tag_text.replace(" chapter ", " ")
     # replaces "Song of Solomon" with "Song"
     inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
+    inp_tag_text = inp_tag_text.replace("First", "1")
+    inp_tag_text = inp_tag_text.replace("Second", "2")
+    inp_tag_text = inp_tag_text.replace("Third", "3")
     # finds books with names starts with digit, adds separator ';' before book name
     # because of references divided with commas, it is difficult to separate book name from previous reference
     # this part of code searches every name which starts from digit in reference
     # and adds ';' symbol before book names was found
 
     # enumerate all references from dictionary of book names
-    for _, (key, _) in enumerate(book_index_to_MyBible['en'].items()):
+    for _, (key, _) in enumerate(book_index_to_MyBible.items()):
         # if it is a book name starting from digit
         if (key[0].isdigit()):
             # add space before and after the digit
@@ -99,6 +104,7 @@ book_index_to_MyBible = dict([\
 ('Job',220),\
 ('Ps',230),\
 ('Psalm',230),\
+('Psalms',230),\
 ('Prov',240),\
 ('Proverbs',240),\
 ('Eccl',250),\
@@ -108,6 +114,7 @@ book_index_to_MyBible = dict([\
 ('Songs',260),\
 ('Sol',260),\
 ('Isa',290),\
+('Is',290),\
 ('Isaiah',290),\
 ('Jer',300),\
 ('Jeremiah',300),\

@@ -15,6 +15,7 @@ import json
 import importlib
 
 from bs4 import BeautifulSoup
+from sqlalchemy.sql.expression import false
 
 #import bible_codes
 
@@ -50,7 +51,13 @@ class text_material:
         """
         self.lang_code = lang
 
-    def content_extract(self, path_to_content: str):
+    def content_extract(self, path_to_content: str, force = False):
+        """
+        checks if material from path_to_content is available in the local storage
+        extracts content of material from local storage or from server
+        
+        if parameter force is True then extracts from server
+        """
         #print("content_extract {0}".format(path_to_content))
         path_local = path_to_content
         # remove https from root directory name 
@@ -59,7 +66,7 @@ class text_material:
         # concatenate path to cache and path to extracted file within the cache
         path_to_file = self.path_to_cache + '/' + path_local
         # check if file already exists in the cache ?
-        if (os.path.isfile(path_to_file)):
+        if (os.path.isfile(path_to_file) and not(force)):
             # if file already exist then read from the local file
             with open(path_to_file) as inp_file:
                 self.r_json = json.load(inp_file)
@@ -464,7 +471,7 @@ class SS_year(text_material):
             .format(self.site, self.lang_code, self.year)
         print("quarters_list_get with {0}".format(request_str))
         # sends request to the server
-        self.content_extract(request_str)
+        self.content_extract(request_str, force=True)
         
         # selects quarters for the year and appends it to the quarters array
         
