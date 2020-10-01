@@ -10,6 +10,8 @@
  
 """
 
+import regex as re
+
 db_info_description_title = "Seventh-day Adventist Church`s Sabbath School lessons"
 db_info_description_version_adult = "for adults"
 db_info_description_version_youth = "for youth"
@@ -23,7 +25,13 @@ def ref_tag_preprocess(inp_tag_text):
     """ function adopts references
     references in lessons in English are specific
     """
-    
+    #replace phrases like "Chapter 3-11 of Genesis" with "Genesis 3-11"
+    find_template_chapter_name = re.compile('\s*(Chapter)s? ([0-9]+-*[0-9]*) of (.*)', re.IGNORECASE)
+    proc_template_chapter_name = find_template_chapter_name.match(inp_tag_text)
+    if (proc_template_chapter_name):
+        #print(proc_template_chapter_name)
+        inp_tag_text = proc_template_chapter_name.group(3) + " " + proc_template_chapter_name.group(2)
+        #print("result {0}".format(inp_tag_text))
     # replaces "see also" with spaces
     inp_tag_text = inp_tag_text.replace("see also", " ")
     inp_tag_text = inp_tag_text.replace(" and ", ", ")
@@ -33,6 +41,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("First", "1")
     inp_tag_text = inp_tag_text.replace("Second", "2")
     inp_tag_text = inp_tag_text.replace("Third", "3")
+    inp_tag_text = inp_tag_text.replace("Verses", ":")
     # finds books with names starts with digit, adds separator ';' before book name
     # because of references divided with commas, it is difficult to separate book name from previous reference
     # this part of code searches every name which starts from digit in reference
@@ -57,12 +66,14 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" and ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("to", "-")
+    
     return inp_tag_text
 
 
 book_index_to_MyBible = dict([\
 ('Gen',10),\
 ('Genesis',10),\
+('Ex',20),\
 ('Exo',20),\
 ('Exod',20),\
 ('Exodus',20),\
@@ -152,6 +163,7 @@ book_index_to_MyBible = dict([\
 ('Matthew',470),\
 ('Mar',480),\
 ('Mark',480),\
+('Lk',490),\
 ('Luk',490),\
 ('Luke',490),\
 ('John',500),\

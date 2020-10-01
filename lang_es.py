@@ -28,6 +28,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
     inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
+    inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
     return inp_tag_text
 
@@ -118,6 +119,7 @@ book_index_to_MyBible = dict([\
 ('Luc',490),\
 ('Lucas',490),\
 ('Juan',500),\
+('John',500),\
 ('Hechos',510),\
 ('Hech',510),\
 ('Santiago',660),\

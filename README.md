@@ -14,7 +14,16 @@ git clone https://github.com/Juzujka/SDA\_SS\_to\_MyBible.git
 
 or download zip into the local directory.
 
-Run the command like below with desirable arguments
+Install required modules:
+```
+python3 -m pip install regex
+```
+or
+```
+pip3 install regex
+```
+
+Run the command like below with an appropriate arguments:
 
 
 ```

@@ -31,13 +31,18 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
     inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
     inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
+    inp_tag_text = inp_tag_text.replace("Псалмы", "Псалом")
+    inp_tag_text = inp_tag_text.replace("псалмы", "Псалом")
+    inp_tag_text = inp_tag_text.replace("Стихи", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     return inp_tag_text
 
+#TODO: check this, dict replaced with { for avoiding a warning
 book_index_to_MyBible = dict([\
+#book_index_to_MyBible = {[\
 ('Быт',10),\
 ('Бытие',10),\
 ('Исх',20),\
@@ -201,3 +206,4 @@ book_index_to_MyBible = dict([\
 ('Лаод',780),\
 ('Мол',790),\
 ])
+#]}
