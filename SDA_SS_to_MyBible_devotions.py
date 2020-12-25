@@ -13,6 +13,7 @@ import sqlite3
 import requests
 import json
 import importlib
+import sys
 
 from bs4 import BeautifulSoup
 #from sqlalchemy.sql.expression import false
@@ -256,7 +257,7 @@ class lesson(text_material):
         for day_N in range(1, 8):
             # prints number of current lesson and number of current day,
             # it is useful for progress indication 
-            print("lesson {0} day {1}".format(self.lesson_N, day_N))
+            print("get lesson {0} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
             # creates a new object for the day
             curr_day = day()
             # sets language of the day same as language of the lesson
@@ -859,7 +860,8 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\’\']+")
 
-    inp_tag_text = inp_tag.get_text()
+    inp_tag_text_src = inp_tag.get_text()
+    inp_tag_text = inp_tag_text_src
     # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     inp_tag_text = inp_tag_text + ";"
@@ -911,7 +913,13 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         book_name_to_find = "".join(book_name_as_list)
         book_N = bible_codes.book_index_to_MyBible.get(book_name_to_find)
         if (book_N == None):
-            print("! referense not recognised, refs : {0} ; ref {1}; book name {2}".format(refs, ref, book_name))
+            print("! referense not recognised, refs : {0} -> {1} ; ref {2}; book name {3}".format(inp_tag_text_src, refs, ref, book_name))
+            inp = ""
+            while (not(inp == 'y' or inp == 'n')):
+                print("exit? (y/n)")
+                inp = input()
+            if (inp == 'y'):
+                sys.exit()
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
@@ -1096,7 +1104,7 @@ if __name__ == '__main__':
             lesson.set_lang_code(args.lang)
             # receives content for the new lesson
             #lesson.get_content()
-            print("lesson {0} day {1}".format(args.test_n_less, args.test_n_day))
+            print("lesson {0} day {1} {2}".format(args.test_n_less, args.test_n_day, request_str))
             # creates a new object for the day
             curr_day = day()
             # sets language of the day same as language of the lesson

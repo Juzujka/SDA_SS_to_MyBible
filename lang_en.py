@@ -25,15 +25,29 @@ def ref_tag_preprocess(inp_tag_text):
     """ function adopts references
     references in lessons in English are specific
     """
+    inp_tag_text = inp_tag_text.replace("–", "-")
     #replace phrases like "Chapter 3-11 of Genesis" with "Genesis 3-11"
-    find_template_chapter_name = re.compile('\s*(Chapter)s? ([0-9]+-*[0-9]*) of (.*)', re.IGNORECASE)
+    #print ('process {0}'.format(inp_tag_text))
+    find_template_chapter_name = re.compile(r'\s*(chapter)s? ([0-9]+-*[0-9]*) of (.*)', re.IGNORECASE)
     proc_template_chapter_name = find_template_chapter_name.match(inp_tag_text)
     if (proc_template_chapter_name):
         #print(proc_template_chapter_name)
         inp_tag_text = proc_template_chapter_name.group(3) + " " + proc_template_chapter_name.group(2)
         #print("result {0}".format(inp_tag_text))
+    #print('ref {0}'.format(inp_tag_text))
+    #find_verses_with_subverses = re.compile(r'((?<=[0-9])+[a-d])')
+    #proc_verses_with_subverses = find_verses_with_subverses.findall(inp_tag_text)
+    inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+    #if (proc_verses_with_subverses):
+    #    print('proc_verses_with_subverses {0} -> {1}'.format(proc_verses_with_subverses, ''))
+    #else:
+    #    pass
+        #print('no find_verses_with_subverses')
     # replaces "see also" with spaces
     inp_tag_text = inp_tag_text.replace("see also", " ")
+    inp_tag_text = inp_tag_text.replace("see", " ")
+    inp_tag_text = inp_tag_text.replace("compare", " ")
+    inp_tag_text = inp_tag_text.replace("Chapters", " ")
     inp_tag_text = inp_tag_text.replace(" and ", ", ")
     inp_tag_text = inp_tag_text.replace(" chapter ", " ")
     # replaces "Song of Solomon" with "Song"
@@ -41,7 +55,9 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("First", "1")
     inp_tag_text = inp_tag_text.replace("Second", "2")
     inp_tag_text = inp_tag_text.replace("Third", "3")
+    inp_tag_text = inp_tag_text.replace("is verses", ":")
     inp_tag_text = inp_tag_text.replace("Verses", ":")
+    inp_tag_text = inp_tag_text.replace("verses", ":")
     # finds books with names starts with digit, adds separator ';' before book name
     # because of references divided with commas, it is difficult to separate book name from previous reference
     # this part of code searches every name which starts from digit in reference

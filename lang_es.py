@@ -9,6 +9,7 @@
  and some text for internationalization.
  
 """
+import regex as re
 
 db_info_description_title = "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día"
 db_info_description_version_adult = "para adultos"
@@ -23,13 +24,16 @@ db_info_description_day = "el dia"
 def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Spanish"""
 
+    inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
+    inp_tag_text = inp_tag_text.replace(" e ", "; ")
     inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
+    inp_tag_text = inp_tag_text.replace("vers. ", ":")
     return inp_tag_text
 
 book_index_to_MyBible = dict([\
@@ -106,6 +110,7 @@ book_index_to_MyBible = dict([\
 ('Hab',420),\
 ('Habacuc',420),\
 ('Sofonías',430),\
+('Sof',430),\
 ('Hag',440),\
 ('Hageo',440),\
 ('Zac',450),\
