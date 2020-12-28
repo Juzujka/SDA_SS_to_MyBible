@@ -9,6 +9,7 @@
  and some text for internationalization.
  
 """
+import regex as re
 
 db_info_description_title = "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня"
 db_info_description_version_adult = "для взрослых"
@@ -26,6 +27,8 @@ def ref_tag_preprocess(inp_tag_text):
     #TODO: fix "see also"
     inp_tag_text = inp_tag_text.replace("see also", " ")
     # long book name for Song of Solomon
+    inp_tag_text = re.sub(r'((?<=[0-9])+[а-д])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'((?<=[0-9])+\s[а-д])', '', inp_tag_text)
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
@@ -35,6 +38,8 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("Стихи", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
+    inp_tag_text = inp_tag_text.replace("Главы", "")
+    inp_tag_text = inp_tag_text.replace("и далее", "")
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
