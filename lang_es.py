@@ -30,10 +30,13 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
     inp_tag_text = inp_tag_text.replace(" e ", "; ")
     inp_tag_text = inp_tag_text.replace(" al ", "-")
+    inp_tag_text = inp_tag_text.replace(" a ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
     inp_tag_text = inp_tag_text.replace("vers. ", ":")
+    if ((inp_tag_text[-2:] == " a") or (inp_tag_text[-2:] == " b")):
+        inp_tag_text = inp_tag_text[:-3]
     return inp_tag_text
 
 book_index_to_MyBible = dict([\

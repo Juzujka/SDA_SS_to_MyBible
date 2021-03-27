@@ -50,6 +50,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Chapters", " ")
     inp_tag_text = inp_tag_text.replace(" and ", ", ")
     inp_tag_text = inp_tag_text.replace(" chapter ", " ")
+    inp_tag_text = inp_tag_text.replace(" through ", " ")
     # replaces "Song of Solomon" with "Song"
     inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
     inp_tag_text = inp_tag_text.replace("First", "1")
