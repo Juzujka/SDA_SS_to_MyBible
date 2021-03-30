@@ -14,6 +14,7 @@ import requests
 import json
 import importlib
 import sys
+import unicodedata
 
 from bs4 import BeautifulSoup
 #from sqlalchemy.sql.expression import false
@@ -809,7 +810,7 @@ class db_MyBible_devotions_SS:
                         days_accumulator = "<h3>" + "{0}-{1}".format(quarter.year, quarter.quart_N) + " " + quarter.quarter_title + "</h3>" + "<p>" + quarter.quarter_description + "</p>" +  days_accumulator
                     days_accumulator = days_accumulator + day_content_handled
                     # if the current day is not in current year then keep current day in the days_accumulator
-                    if (day.day_date.year == self.year):
+                    if ((day.day_date.year == self.year)):# or 1): #fix for bug in sources of lessons at 2021q2 
                         # if the current day is in current year then put day into database and clear days_accumulator
                         print( "put day {0}: ".format(days_counter))
                         self.db_cursor.execute(exec_string, (days_counter, days_accumulator))
@@ -862,6 +863,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
     inp_tag_text_src = inp_tag.get_text()
     inp_tag_text = inp_tag_text_src
+    inp_tag_text = unicodedata.normalize("NFKD", inp_tag_text)  # replace \xa0 (unbreaking space) with space
     # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     inp_tag_text = inp_tag_text + ";"
