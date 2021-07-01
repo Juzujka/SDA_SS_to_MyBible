@@ -25,10 +25,12 @@ def ref_tag_preprocess(inp_tag_text):
     
     # some words in references
     #TODO: fix "see also"
+    
     inp_tag_text = inp_tag_text.replace("see also", " ")
     # long book name for Song of Solomon
     inp_tag_text = re.sub(r'((?<=[0-9])+[а-д])', '', inp_tag_text)
     inp_tag_text = re.sub(r'((?<=[0-9])+\s[а-д])', '', inp_tag_text)
+    inp_tag_text = inp_tag_text.replace("Иисуса Навина", "Навина")
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
@@ -36,6 +38,13 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
     inp_tag_text = inp_tag_text.replace("Псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("псалмы", "Псалом")
+    inp_tag_text = inp_tag_text.replace("Евангелие от", "")
+    inp_tag_text = inp_tag_text.replace("от Марка", "Марка")
+    inp_tag_text = inp_tag_text.replace("от Матфея", "Матфея")
+    inp_tag_text = inp_tag_text.replace("от Луки", "Луки")
+    inp_tag_text = inp_tag_text.replace("от Иоанна", "Иоанна")
+    inp_tag_text = inp_tag_text.replace("Послание", "")
+    inp_tag_text = inp_tag_text.replace("к евреям", "Евреям")
     inp_tag_text = inp_tag_text.replace("Стихи", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
     inp_tag_text = inp_tag_text.replace("Главы", "")
@@ -90,6 +99,7 @@ book_index_to_MyBible = dict([\
 ('Есф',190),\
 ('Есфирь',190),\
 ('Иов',220),\
+('Иова',220),\
 ('Пс',230),\
 ('Псалом',230),\
 ('Псалтирь',230),\

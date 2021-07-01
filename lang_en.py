@@ -51,6 +51,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" and ", ", ")
     inp_tag_text = inp_tag_text.replace(" chapter ", " ")
     inp_tag_text = inp_tag_text.replace(" through ", " ")
+    inp_tag_text = inp_tag_text.replace(" cf. ", " ")
     # replaces "Song of Solomon" with "Song"
     inp_tag_text = inp_tag_text.replace("Song of Solomon", "Song")
     inp_tag_text = inp_tag_text.replace("First", "1")
@@ -159,6 +160,7 @@ book_index_to_MyBible = dict([\
 ('Amos',370),\
 ('Oba',380),\
 ('Obadiah',380),\
+('Jon',390),\
 ('Jona',390),\
 ('Jonah',390),\
 ('Mic',400),\

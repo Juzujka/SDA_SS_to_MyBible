@@ -41,17 +41,25 @@ def ref_tag_preprocess(inp_tag_text):
 
 book_index_to_MyBible = dict([\
 ('Génesis',10),\
+('Génesis',10),\
 ('Genesis',10),\
 ('Gén',10),\
+('Gén',10),\
 ('Éxodo',20),\
+('Éxodo',20),\
 ('Éxo',20),\
+('Éxo',20),\
 ('Levítico',20),\
+('Levítico',20),\
 ('Lev',20),\
 ('Núm',40),\
+('Núm',40),\
 ('Números',40),\
+('Números',40),\
 ('Deuteronomio',50),\
 ('Deut',50),\
 ('Josué',60),\
+('Josué',60),\
 ('Jos',60),\
 ('Jueces',70),\
 ('Juec',70),\
@@ -66,7 +74,9 @@ book_index_to_MyBible = dict([\
 ('2Rey',110),\
 ('1Crónicas',130),\
 ('1Crón',130),\
+('1Crón',130),\
 ('2Crónicas',140),\
+('2Crónicas',140),\
 ('2Crón',130),\
 ('Esdras',150),\
 ('Esd',150),\
@@ -87,8 +97,10 @@ book_index_to_MyBible = dict([\
 ('Cant',260),\
 ('Isaías',290),\
 ('Isaias',290),\
+('Isaías',290),\
 ('Isa',290),\
 ('Jeremías',300),\
+('Jeremías',300),\
 ('Jer',300),\
 ('Lam',310),\
 ('Lamentaciones',310),\
@@ -105,11 +117,15 @@ book_index_to_MyBible = dict([\
 ('Amos',370),\
 ('Abdías',380),\
 ('Jonás',390),\
+('Jonás',390),\
+('Jonas',390),\
+('Jon',390),\
 ('Miqueas',400),\
 ('Miq',400),\
 ('Nah',410),\
 ('Nahum',410),\
 ('Nahúm',410),\
+('Nahúm',410),\
 ('Hab',420),\
 ('Habacuc',420),\
 ('Sofonías',430),\
@@ -120,6 +136,7 @@ book_index_to_MyBible = dict([\
 ('Zacarías',450),\
 ('Mal',460),\
 ('Malaquías',460),\
+('Malaquías',460),\
 ('Mat',470),\
 ('Mateo',470),\
 ('Mar',480),\
@@ -146,7 +163,9 @@ book_index_to_MyBible = dict([\
 ('2Cor',540),\
 ('2Corintios',540),\
 ('Gál',550),\
+('Gál',550),\
 ('Gálatas',550),\
+('Gálatas',550),\
 ('Ef',560),\
 ('Efe',560),\
 ('Efesios',560),\
