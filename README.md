@@ -16,11 +16,11 @@ or download zip into the local directory.
 
 Install required modules:
 ```
-python3 -m pip install regex
+python3 -m pip install bs4 regex
 ```
 or
 ```
-pip3 install regex
+pip3 install bs4 regex
 ```
 
 Run the command like below with an appropriate arguments:
