@@ -149,6 +149,7 @@ book_index_to_MyBible = dict([\
 ('Jeremiah',300),\
 ('Lam',310),\
 ('Lamentations',310),\
+('Eze',330),\
 ('Ezek',330),\
 ('Ezekiel',330),\
 ('Dan',340),\
@@ -169,6 +170,7 @@ book_index_to_MyBible = dict([\
 ('Nahum',410),\
 ('Hab',420),\
 ('Habakkuk',420),\
+('Habbakuk',420),\
 ('Zeph',430),\
 ('Zephaniah',430),\
 ('Hag',440),\
@@ -187,6 +189,7 @@ book_index_to_MyBible = dict([\
 ('Luke',490),\
 ('John',500),\
 ('Acts',510),\
+('Act',510),\
 ('Jam',660),\
 ('James',660),\
 ('1Peter',670),\
@@ -227,8 +230,10 @@ book_index_to_MyBible = dict([\
 ('Tit',630),\
 ('Titus',630),\
 ('Phlm',640),\
+('Philemon',640),\
 ('Heb',650),\
 ('Hebrews',650),\
+('Hebrew',650),\
 ('Jude',720),\
 ('Rev',730),\
 ('Revelation',730),\

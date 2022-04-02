@@ -258,7 +258,7 @@ class lesson(text_material):
         for day_N in range(1, 8):
             # prints number of current lesson and number of current day,
             # it is useful for progress indication 
-            print("get lesson {0} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
+            print("get lesson {0:2} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
             # creates a new object for the day
             curr_day = day()
             # sets language of the day same as language of the lesson
@@ -785,6 +785,7 @@ class db_MyBible_devotions_SS:
         # the day after the last day in the database is the first day of current quarter
         # set days_counter to number of the last day in the database plus 1
         days_counter = self.db_last_day + 1
+        days_accumulator = ""
         print("the number of the quarters is {0}".format(len(self.SS_year_inst.quarters)))
         for quarter in self.SS_year_inst.quarters:
             lesson_counter = 1
@@ -793,7 +794,7 @@ class db_MyBible_devotions_SS:
                 print("lesson N {0:2} - {1:2}".format(lesson_counter, lesson.lesson_N))
                 # days_accumulator concatenates html for the current day
                 # in the beginning and in the end of the year it is possible that days are considers days of current quarter from the year before and the year after the current year 
-                days_accumulator = ""
+                #days_accumulator = ""
                 for day in lesson.days:
                     # day starts from a lesson number and a header
                     day_content_handled = "<p>  {0} № {1} {2} {3}</p> <h4>{4}</h4> {5}".format(

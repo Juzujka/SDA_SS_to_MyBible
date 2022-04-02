@@ -35,6 +35,9 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
     inp_tag_text = inp_tag_text.replace("vers. ", ":")
+    inp_tag_text = inp_tag_text.replace("ver. ", ":")
+    inp_tag_text = inp_tag_text.replace("ver ", ":")
+    inp_tag_text = inp_tag_text.replace("versículos ", ":")
     if ((inp_tag_text[-2:] == " a") or (inp_tag_text[-2:] == " b")):
         inp_tag_text = inp_tag_text[:-3]
     return inp_tag_text
@@ -75,12 +78,15 @@ book_index_to_MyBible = dict([\
 ('1Crónicas',130),\
 ('1Crón',130),\
 ('1Crón',130),\
+('1Crón',130),\
 ('2Crónicas',140),\
 ('2Crónicas',140),\
-('2Crón',130),\
+('2Crón',140),\
+('2Crón',140),\
 ('Esdras',150),\
 ('Esd',150),\
 ('Nehemías',160),\
+('Nehemías',160),\
 ('Neh',160),\
 ('Ester',190),\
 ('Est',190),\
@@ -92,6 +98,7 @@ book_index_to_MyBible = dict([\
 ('Proverbios',240),\
 ('Prov',240),\
 ('Eclesiastés',250),\
+('Eclesiastés',250),\
 ('Ecl',250),\
 ('Cantares',260),\
 ('Cant',260),\
@@ -115,6 +122,7 @@ book_index_to_MyBible = dict([\
 ('Am',370),\
 ('Amós',370),\
 ('Amos',370),\
+('Amós',370),\
 ('Abdías',380),\
 ('Jonás',390),\
 ('Jonás',390),\
@@ -134,6 +142,7 @@ book_index_to_MyBible = dict([\
 ('Hageo',440),\
 ('Zac',450),\
 ('Zacarías',450),\
+('Zacarías',450),\
 ('Mal',460),\
 ('Malaquías',460),\
 ('Malaquías',460),\
