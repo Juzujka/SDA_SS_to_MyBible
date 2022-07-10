@@ -857,7 +857,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
     # regular expression for selecting reference to book name with verses in particular book
                             #   /  book name                                         \ /    head, verse repeatable after selected book name                                                                                    \ 
-    find_refs = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\,\s*)?)*")
+    find_refs = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\s*)?)*")
 
     # regular expression for selecting book name from reference with book name, head and verse
     parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+")
