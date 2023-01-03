@@ -34,8 +34,9 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Плач Иеремии", "Плач")
-    inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
     inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
+    inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
+    inp_tag_text = inp_tag_text.replace("к ефесянам", "Ефесянам")
     inp_tag_text = inp_tag_text.replace("Псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("Евангелие от", "")
@@ -166,6 +167,7 @@ book_index_to_MyBible = dict([\
 ('Мк',480),\
 ('Лук',490),\
 ('Луки',490),\
+('Luke',490),\
 ('Лк',490),\
 ('Ин',500),\
 ('Иоанна',500),\

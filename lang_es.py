@@ -76,6 +76,7 @@ book_index_to_MyBible = dict([\
 ('2Reyes',110),\
 ('2Rey',110),\
 ('1Crónicas',130),\
+('1Crónicas',130),\
 ('1Crón',130),\
 ('1Crón',130),\
 ('1Crón',130),\
@@ -152,6 +153,7 @@ book_index_to_MyBible = dict([\
 ('Marcos',480),\
 ('Luc',490),\
 ('Lucas',490),\
+('Luke',490),\
 ('Juan',500),\
 ('John',500),\
 ('Hechos',510),\
