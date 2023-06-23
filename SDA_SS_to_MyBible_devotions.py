@@ -258,7 +258,9 @@ class lesson(text_material):
         for day_N in range(1, 8):
             # prints number of current lesson and number of current day,
             # it is useful for progress indication 
-            print("get lesson {0:2} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
+            #print("get lesson {0:2} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
+            print("get lesson {0:2} day {1} {2}/days/{1:02}/read/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
+            #self.content_extract("{0}/days/{1:02}/read/index.json".format(self.full_path, self.day_N))
             # creates a new object for the day
             curr_day = day()
             # sets language of the day same as language of the lesson
