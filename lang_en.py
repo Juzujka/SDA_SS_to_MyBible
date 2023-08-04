@@ -214,7 +214,6 @@ book_index_to_MyBible = dict([\
 ('Eph',560),\
 ('Ephesians',560),\
 ('Phil',570),\
-#('Philem',570),\
 ('Philippians',570),\
 ('Col',580),\
 ('Colossians',580),\
@@ -232,6 +231,7 @@ book_index_to_MyBible = dict([\
 ('Titus',630),\
 ('Phlm',640),\
 ('Philemon',640),\
+('Philem',640),\
 ('Heb',650),\
 ('Hebrews',650),\
 ('Hebrew',650),\
