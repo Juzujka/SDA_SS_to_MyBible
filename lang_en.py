@@ -230,6 +230,7 @@ book_index_to_MyBible = dict([\
 ('Tit',630),\
 ('Titus',630),\
 ('Phlm',640),\
+('Philem',640),\
 ('Philemon',640),\
 ('Philem',640),\
 ('Heb',650),\
