@@ -46,6 +46,7 @@ def ref_tag_preprocess(inp_tag_text):
     # replaces "see also" with spaces
     inp_tag_text = inp_tag_text.replace("see also", " ")
     inp_tag_text = inp_tag_text.replace("See also", " ")
+    inp_tag_text = inp_tag_text.replace("also", " ")
     inp_tag_text = inp_tag_text.replace("see", " ")
     inp_tag_text = inp_tag_text.replace("compare", " ")
     inp_tag_text = inp_tag_text.replace("Chapters", " ")
