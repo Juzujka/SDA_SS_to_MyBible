@@ -495,7 +495,7 @@ class SS_year(text_material):
                 == self.year and len(quart.get("id").split("-")) == 2):
                 self.quarters_list_year.append(quart)
 
-        print(" quarters for selected year: ")
+        print(" quarters available for selected year: ")
         # sorts quarters in array by quarter number
         self.quarters_list_year.sort(key = lambda quart_rec:
                                       quart_rec.get("id").split("-")[1])
@@ -572,9 +572,9 @@ class db_MyBible_devotions_SS:
                     # tries to open file_name as database
                     self.db_conn = sqlite3.connect(self.file_name)
                     self.db_cursor = self.db_conn.cursor()
-                    print("connection : {0} ; cursor : {1}"\
-                          .format(self.db_conn, self.db_cursor))
-                    print("sqlite3 version {0}".format(sqlite3.version))
+                    #print("connection : {0} ; cursor : {1}"\
+                    #      .format(self.db_conn, self.db_cursor))
+                    #print("sqlite3 version {0}".format(sqlite3.version))
                     ret_val = 1
                 except sqlite3.Error as e:
                     print(e)
@@ -740,7 +740,7 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text())
+        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text().replace("'", "''"))
         if DEBUG_LEVEL > 0:
             print ("execute db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -769,7 +769,8 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("executing db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text())
+        # in get_db_detailed_info_text() doubling single quotes to avoid errors in processing in SQLite
+        exec_string = """INSERT INTO info VALUES ( 'detailed_info', '{0}' )""".format(self.get_db_detailed_info_text().replace("'", "''"))
         if DEBUG_LEVEL > 0:
             print ("executing db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
@@ -1166,15 +1167,15 @@ if __name__ == '__main__':
                     devotions.SS_year_inst.quarters_list_get()
                     if (not(devotions.SS_year_inst.quarters_list_year == [])):
                         # create file with database
+                        print ("list of quarters to add")
+                        # print quarters to add
+                        for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
+                            print(i_quarter.get('id'))
+                        # get content of quarters
+                        print ("-- get content --")
+                        devotions.SS_year_inst.get_content()
+                        # create table with info in database file
                         if(devotions.create_db(args.db_file) > 0):
-                            print ("list of quarters to add")
-                            # print quarters to add
-                            for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
-                                print(i_quarter.get('id'))
-                            # get content of quarters
-                            print ("-- get content --")
-                            devotions.SS_year_inst.get_content()
-                            # create table with info in database file
                             print ("-- create_table_info --")
                             devotions.create_table_info()
                             # create table with devotions in database file
