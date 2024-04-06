@@ -24,15 +24,25 @@ db_info_description_day = "el dia"
 def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Spanish"""
 
+    #inp_tag_text = inp_tag_text.replace(" al ", "-")
+    # Replace "al" after digit with "-"
+    inp_tag_text = re.sub(r'(?<=\d|\s)al', '-', inp_tag_text)
+    
     inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+
+
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
     inp_tag_text = inp_tag_text.replace(" e ", "; ")
-    inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = inp_tag_text.replace(" a ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
+    
+    #remove 'Envi'
+    inp_tag_text = re.compile(re.escape('envi'), re.IGNORECASE).sub('', inp_tag_text)
+    
+    inp_tag_text = inp_tag_text.replace("envi", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
     inp_tag_text = inp_tag_text.replace("vers. ", ":")
     inp_tag_text = inp_tag_text.replace("ver. ", ":")
