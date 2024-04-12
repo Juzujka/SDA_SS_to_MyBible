@@ -1,0 +1,17 @@
+{
+  "url": "https://dl.dropbox.com/scl/fi/dx3dntvmhy8827fjfvwd1/SS-ru-ad-24.devotions.registry.json?rlkey=s6q1e5r9asjllz6u9ql5fqxe0&",
+  "file_name": "SS-ru-ad-24.devotions.registry.json",
+  "description": "Sabath School Lessons of the SDA church, 2024",
+  "modules":
+  [
+    {
+       "download_url": "https://dl.dropbox.com/scl/fi/zsyyedix0clbk3znnsap8/SS-ru-ad-24.devotions.SQLite3?rlkey=7j1bqmlcbfizlw6y6xykrki7c&",
+       "file_name": "SS-ru-ad-24.devotions.SQLite3",
+       "language_code": "ru",
+       "description": "Урочники субботней школы церкви АСД, 2024 год",
+       "update_date": "2024-04-01>",
+       "update_info": "initial 2"
+    }
+  ]
+}
+
