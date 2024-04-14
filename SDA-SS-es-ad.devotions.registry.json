@@ -1,0 +1,33 @@
+{
+  "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/distribution_through_repository/SDA-SS-es-ad.devotions.registry.json",
+  "file_name": "SDA-SS-es-ad.devotions.registry.json",
+  "description": "Sabath School Lessons of the SDA church, 2024",
+  "modules":
+  [
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-es-ad'22.devotions.SQLite3",
+       "file_name": "SS-es-ad'22.devotions.SQLite3",
+       "language_code": "es",
+       "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2022",
+       "update_date": "2024-04-01",
+       "update_info": "initial"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-es-ad'23.devotions.SQLite3",
+       "file_name": "SS-es-ad'23.devotions.SQLite3",
+       "language_code": "es",
+       "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2023",
+       "update_date": "2024-04-01",
+       "update_info": "initial"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-es-ad'24.devotions.SQLite3",
+       "file_name": "SS-es-ad'24.devotions.SQLite3",
+       "language_code": "es",
+       "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2024",
+       "update_date": "2024-04-01",
+       "update_info": "initial"
+    }
+  ]
+}
+

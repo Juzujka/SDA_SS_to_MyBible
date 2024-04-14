@@ -1,0 +1,32 @@
+{
+  "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/distribution_through_repository/SDA-SS-ru-ad.devotions.registry.json",
+  "file_name": "SDA-SS-ru-ad.devotions.registry.json",
+  "description": "Sabath School Lessons of the SDA church, 2024",
+  "modules":
+  [
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'22.devotions.SQLite3",
+       "file_name": "SS-ru-ad'22.devotions.SQLite3",
+       "language_code": "ru",
+       "description": "Урочники субботней школы церкви АСД, 2022 год",
+       "update_date": "2024-04-03",
+       "update_info": "initial 3"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'23.devotions.SQLite3",
+       "file_name": "SS-ru-ad'23.devotions.SQLite3",
+       "language_code": "ru",
+       "description": "Урочники субботней школы церкви АСД, 2023 год",
+       "update_date": "2024-04-03",
+       "update_info": "initial 3"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'24.devotions.SQLite3",
+       "file_name": "SS-ru-ad'24.devotions.SQLite3",
+       "language_code": "ru",
+       "description": "Урочники субботней школы церкви АСД, 2024 год",
+       "update_date": "2024-04-03",
+       "update_info": "initial 3"
+    }
+  ]
+}
