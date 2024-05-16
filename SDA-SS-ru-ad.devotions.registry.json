@@ -25,8 +25,8 @@
        "file_name": "SS-ru-ad'24.devotions.SQLite3",
        "language_code": "ru",
        "description": "Урочники субботней школы церкви АСД, 2024 год",
-       "update_date": "2024-04-03",
-       "update_info": "initial"
+       "update_date": "2024-05-16",
+       "update_info": "order of days changed"
     }
   ]
 }
