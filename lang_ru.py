@@ -47,10 +47,12 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Послание", "")
     inp_tag_text = inp_tag_text.replace("к евреям", "Евреям")
     inp_tag_text = inp_tag_text.replace("Стихи", "")
+    inp_tag_text = inp_tag_text.replace("стих", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
     inp_tag_text = inp_tag_text.replace("Главы", "")
     inp_tag_text = inp_tag_text.replace("и далее", "")
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
+    inp_tag_text = inp_tag_text.replace("начало", "")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     return inp_tag_text
