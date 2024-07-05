@@ -77,3 +77,5 @@ English - `https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SD
 Spanish - `https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-es-ad.devotions.registry.json`  
 
 If you want Sabbath School module for other language then ask author <juzujka@gmail.com> or make it for yourself as described in the [Getting started](#getting-started) section.
+
+Now you can find Sabbath School modules in the list of devotions.
