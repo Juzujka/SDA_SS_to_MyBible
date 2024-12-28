@@ -148,6 +148,7 @@ book_index_to_MyBible = dict([\
 ('Hab',420),\
 ('Habacuc',420),\
 ('Sofonías',430),\
+('Sofonías',430),\
 ('Sof',430),\
 ('Hag',440),\
 ('Hageo',440),\
