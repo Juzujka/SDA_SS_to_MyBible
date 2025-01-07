@@ -28,8 +28,8 @@ def ref_tag_preprocess(inp_tag_text):
     
     inp_tag_text = inp_tag_text.replace("see also", " ")
     # long book name for Song of Solomon
-    inp_tag_text = re.sub(r'((?<=[0-9])+[а-д])', '', inp_tag_text)
-    inp_tag_text = re.sub(r'((?<=[0-9])+\s[а-д])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'(?<=[0-9])[а-д](?![а-яА-Я])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'(?<=[0-9])\s[а-д](?![а-яА-Я])', '', inp_tag_text)
     inp_tag_text = inp_tag_text.replace("Иисуса Навина", "Навина")
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
