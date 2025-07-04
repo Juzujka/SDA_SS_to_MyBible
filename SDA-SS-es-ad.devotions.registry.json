@@ -43,6 +43,14 @@
        "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2025",
        "update_date": "2025-03-23",
        "update_info": "lecciones agregadas del trimestre 2: `Alusiones, imágenes y símbolos: Cómo estudiar la profecía bíblica` "
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-es-ad'25.devotions.SQLite3",
+       "file_name": "SS-es-ad'25.devotions.SQLite3",
+       "language_code": "es",
+       "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2025",
+       "update_date": "2025-07-04",
+       "update_info": "lecciones agregadas del trimestre 3: `El Éxodo: viaje a la Tierra Prometida` "
     }
   ]
 }

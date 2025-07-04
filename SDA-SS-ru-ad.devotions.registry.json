@@ -43,6 +43,15 @@
        "description": "Урочники субботней школы церкви АСД, 2025 год",
        "update_date": "2024-04-05",
        "update_info": "lessons for 2025q2 added"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'25.devotions.SQLite3",
+       "file_name": "SS-ru-ad'25.devotions.SQLite3",
+       "language_code": "ru",
+       "description": "Урочники субботней школы церкви АСД, 2025 год",
+       "update_date": "2025-07-04",
+       "update_info": "добавлены уроки за 2025q3: `Исход. Путешествие в Землю обетованную`"
     }
   ]
 }
+
