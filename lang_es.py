@@ -10,6 +10,7 @@
  
 """
 import regex as re
+import unicodedata
 
 db_info_description_title = "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día"
 db_info_description_version_adult = "para adultos"
@@ -36,6 +37,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
     inp_tag_text = inp_tag_text.replace(" e ", "; ")
     inp_tag_text = inp_tag_text.replace(" a ", " ")
+    inp_tag_text = inp_tag_text.replace(unicodedata.normalize("NFKD", ", capítulo"), " ")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
     
