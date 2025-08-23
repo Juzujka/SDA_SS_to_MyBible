@@ -73,7 +73,7 @@ class text_material:
             with open(path_to_file) as inp_file:
                 self.r_json = json.load(inp_file)
         else:
-            # get data and safe to the local file
+            # get data and save to the local file
             request_str = (path_to_content)
             # send request and get xml  with day of lesson with its attributes
             r = requests.get(request_str)
@@ -158,7 +158,7 @@ class comment(text_material):
     not realized yet, sources of commentaries needed"""
     def __init__(self):
         text_material.__init__(self)
-    def get_content(self, full_path):
+    def get_content(self, full_path, force_update = False):
         """get commentary for the lesson
 
         method calls http request,
@@ -173,7 +173,7 @@ class comment(text_material):
         # set values of attributes to values of parameters passed to function
         self.full_path = full_path
         # create a link for request by adding tail with link to day to the lesson
-        self.content_extract(self.full_path + '/' + "days/teacher-comments/read/index.json")
+        self.content_extract(self.full_path + '/' + "days/teacher-comments/read/index.json", force = force_update)
         self.content = self.r_json.get('content')
         # convert content of the day into format of MyBible
         self.content = adventech_lesson_to_MyBibe_lesson( self.content,
@@ -242,7 +242,7 @@ class lesson(text_material):
     def get_lesson_title(self):
         return self.lesson_block.get("title")
 
-    def get_content(self):
+    def get_content(self, comment_force_update = False):
         """ extracts data for the lesson
         
         fills attributes of the lesson
@@ -282,7 +282,7 @@ class lesson(text_material):
                 # create comment object and process comment
                 self.lesson_comment = comment()
                 self.lesson_comment.set_lang_code(self.lang_code)
-                self.lesson_comment.get_content(self.lesson_full_path)
+                self.lesson_comment.get_content(self.lesson_full_path, comment_force_update)
                 break
 
     def __init__(self, lesson_block, lesson_N):
@@ -343,7 +343,7 @@ class quarter(text_material):
          to write new data """
         self.db_cursor = db_cursor
 
-    def get_content(self):
+    def get_content(self, comment_force_update = False):
         """ gets content of the quarter
         
         prepares gathering data for a lesson and calls gathering methods 
@@ -379,7 +379,7 @@ class quarter(text_material):
             # sets language of a new lesson
             self.lessons_set[-1].set_lang_code(self.lang_code)
             # receives content for the new lesson
-            self.lessons_set[-1].get_content()
+            self.lessons_set[-1].get_content(comment_force_update)
         pass
 
     def print_quarter(self):
@@ -504,7 +504,7 @@ class SS_year(text_material):
         for quart in self.quarters_list_year:
             print("quarter {0}".format(quart.get("id")))
         print()
-    def get_content(self):
+    def get_content(self, comment_force_update = False):
         """ gets content of the year
         
         creates quarter objects with appropriate parameters
@@ -525,7 +525,7 @@ class SS_year(text_material):
             # sets lesson type
             self.quarters[-1].set_lesson_type(self.lesson_type)
             # sends requests chain to get content of each day
-            self.quarters[-1].get_content()
+            self.quarters[-1].get_content(comment_force_update)
 
         
     def __init__(self):
@@ -664,9 +664,9 @@ class db_MyBible_devotions_SS:
         self.SS_year_inst.set_lang_code(self.lang_code)
         self.SS_year_inst.set_lesson_type(self.lesson_type)
         self.SS_year_inst.quarters_list_get()
-    def get_content(self):
+    def get_content(self, comment_force_update = False):
         """ sends chain of requests to get content of days """
-        self.SS_year_inst.get_content()
+        self.SS_year_inst.get_content(comment_force_update)
     def get_db_description_text(self):
         """
         returns description text
@@ -694,7 +694,11 @@ class db_MyBible_devotions_SS:
                 version_text = version_text = bible_codes.db_info_description_version_youth
             else:
                 version_text = ""
-        description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
+        quarter_end = -1
+        if (len(self.SS_year_inst.quarters_list_year) > 0) :
+            quarter_end = self.SS_year_inst.quarters_list_year[-1].get('id')
+        #description_text = "{0} {1} {2}".format(name_text, version_text, self.SS_year_inst.quarters_list_year[-1].get('id'))
+        description_text = "{0} {1} {2}".format(name_text, version_text, quarter_end)
         return  description_text
         
     def get_db_detailed_info_text(self):
@@ -1047,6 +1051,7 @@ if __name__ == '__main__':
     parser.add_argument("-l", "--list"  ,   action = "store_true", help = "get list of available quarters", default = False)
     parser.add_argument(      "--lang"  ,   action = "store",      help = "language", default = "ru")
     parser.add_argument(      "--type"  ,   action = "store",      help = "type of lesson", default = "")
+    parser.add_argument(      "--comm_update", action = "store_true", help = "force updating commentaries from server",  default = False)
     parser.add_argument(      "--test"  ,   action = "store_true", default=False)
     parser.add_argument( "--test_print_day"   ,   action = "store_true", help = "print selected day to console", default=False)
     parser.add_argument( "--test_n_quart" ,   type = int, help="quarter for test", default = 1)
@@ -1137,12 +1142,12 @@ if __name__ == '__main__':
                         # try to open file as database
                         if (devotions.connect_to_db(args.db_file) > 0):
                             # check if new quarters are available?
-                            if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart):
+                            if (len(devotions.SS_year_inst.quarters_list_year) <= devotions.db_end_quart) and (not args.comm_update):
                                 print("nothing to add")
                             else:
                                 # remove from list the quarters which are already in database
-                                for i in range(0, devotions.db_end_quart):
-                                    devotions.SS_year_inst.quarters_list_year.pop(0)
+                                #for i in range(0, devotions.db_end_quart):
+                                #    devotions.SS_year_inst.quarters_list_year.pop(0)
                                 print ("list of quarters to add")
                                 # print quarters which will be added
                                 for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
@@ -1150,7 +1155,7 @@ if __name__ == '__main__':
                                 #get quarters
                                 print ("-- get content --")
                                 #TODO: uncomment this
-                                devotions.SS_year_inst.get_content()
+                                devotions.SS_year_inst.get_content(comment_force_update=args.comm_update)
                                 #append quarters
                                 print ("-- update_description() --")
                                 devotions.update_description()
