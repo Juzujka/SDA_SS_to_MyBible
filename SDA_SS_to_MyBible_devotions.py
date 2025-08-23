@@ -778,7 +778,7 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("executing db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-    def create_table_devotions(self):
+    def create_table_devotions(self, comment_force_update = False):
         """ writes days from gathered days in lessons in quarters in year into the database"""
         
         exec_string = '''CREATE TABLE IF NOT EXISTS devotions (day NUMERIC, devotion TEXT)'''
@@ -789,9 +789,12 @@ class db_MyBible_devotions_SS:
         if DEBUG_LEVEL > 0:
             print ("executing db : {0}".format(exec_string))
         self.db_cursor.execute(exec_string)
-        # the day after the last day in the database is the first day of current quarter
-        # set days_counter to number of the last day in the database plus 1
-        days_counter = self.db_last_day + 1
+        if (not(comment_force_update)):
+            # the day after the last day in the database is the first day of current quarter
+            # set days_counter to number of the last day in the database plus 1
+            days_counter = self.db_last_day + 1
+        else:
+            days_counter = 1
         days_accumulator = ""
         print("the number of the quarters is {0}".format(len(self.SS_year_inst.quarters)))
         for quarter in self.SS_year_inst.quarters:
@@ -810,7 +813,10 @@ class db_MyBible_devotions_SS:
                     if (day.day_N == 7):
                         if not(lesson.lesson_comment == None):
                             day_content_handled += "<h4>{0}</h4>{1}".format(lesson.lesson_comment.title, lesson.lesson_comment.content)
-                    exec_string = '''INSERT INTO devotions VALUES ( ?, ? )'''
+                    if (not(comment_force_update)):
+                        exec_string = '''INSERT INTO devotions VALUES ( :day, :devotion )'''
+                    else :
+                        exec_string = '''UPDATE devotions SET devotion =  :devotion  WHERE day = :day '''
                     if DEBUG_LEVEL > 0:
                         print ("executing db : {0}".format(exec_string))
                     # if it is the first day in the quarter then add a quarter title and a quarter description 
@@ -820,8 +826,13 @@ class db_MyBible_devotions_SS:
                     # if the current day is not in current year then keep current day in the days_accumulator
                     if ((day.day_date.year == self.year)):# or 1): #fix for bug in sources of lessons at 2021q2 
                         # if the current day is in current year then put day into database and clear days_accumulator
-                        print( "put day {0}: ".format(days_counter))
-                        self.db_cursor.execute(exec_string, (days_counter, days_accumulator))
+                        if (not(comment_force_update)):
+                            print( "put day {0}: ".format(days_counter))
+                            self.db_cursor.execute(exec_string, {'day':days_counter, 'devotion':days_accumulator})
+                        else :
+                            if (day.day_N == 7):
+                                print( "replace day {0}: ".format(days_counter))
+                                self.db_cursor.execute(exec_string, {'day':days_counter, 'devotion':days_accumulator})
                         days_accumulator = ""
                         days_counter += 1
                     else:
@@ -1162,7 +1173,7 @@ if __name__ == '__main__':
                                 print ("-- update_detailed_info() --")
                                 devotions.update_detailed_info()
                                 print ("-- create_table_devotions --")
-                                devotions.create_table_devotions()
+                                devotions.create_table_devotions(args.comm_update)
                         else:
                             print("unable to open file with database {0}".format(args.db_file))
                     else:
