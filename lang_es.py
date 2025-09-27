@@ -75,9 +75,11 @@ book_index_to_MyBible = dict([\
 ('Deut',50),\
 ('Josué',60),\
 ('Josué',60),\
+('Josue',60),\
 ('Jos',60),\
 ('Jueces',70),\
 ('Juec',70),\
+('Jue',70),\
 ('Rut',80),\
 ('1Samuel',90),\
 ('1Sam',90),\
