@@ -23,8 +23,8 @@ db_info_description_day = "el dia"
 
 def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Spanish"""
-
-    inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+    #inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'(\d+|\s)al\s', r'\1-', inp_tag_text)	# replace 'al' after digit or space with '-'
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
