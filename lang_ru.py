@@ -28,8 +28,8 @@ def ref_tag_preprocess(inp_tag_text):
     
     inp_tag_text = inp_tag_text.replace("see also", " ")
     # long book name for Song of Solomon
-    inp_tag_text = re.sub(r'((?<=[0-9])+[а-д])', '', inp_tag_text)
-    inp_tag_text = re.sub(r'((?<=[0-9])+\s[а-д])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'(?<=[0-9])[а-д](?![а-яА-Я])', '', inp_tag_text)
+    inp_tag_text = re.sub(r'(?<=[0-9])\s[а-д](?![а-яА-Я])', '', inp_tag_text)
     inp_tag_text = inp_tag_text.replace("Иисуса Навина", "Навина")
     inp_tag_text = inp_tag_text.replace("Песнь Песней", "Песн.")
     inp_tag_text = inp_tag_text.replace("Песни Песней", "Песн.")
@@ -47,10 +47,13 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("Послание", "")
     inp_tag_text = inp_tag_text.replace("к евреям", "Евреям")
     inp_tag_text = inp_tag_text.replace("Стихи", "")
+    inp_tag_text = inp_tag_text.replace("стих", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
     inp_tag_text = inp_tag_text.replace("Главы", "")
-    inp_tag_text = inp_tag_text.replace("и далее", "")
+    inp_tag_text = inp_tag_text.replace("главы", "")
+    inp_tag_text = inp_tag_text.replace("гл.", "")
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
+    inp_tag_text = inp_tag_text.replace("начало", "")
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     return inp_tag_text
@@ -164,6 +167,7 @@ book_index_to_MyBible = dict([\
 ('Мф',470),\
 ('Мар',480),\
 ('Марка',480),\
+('Марк',480),\
 ('Мк',480),\
 ('Лук',490),\
 ('Луки',490),\

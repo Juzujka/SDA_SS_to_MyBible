@@ -36,6 +36,10 @@ arguments:
  * --type - ad - for adult lessons, ay - for youth lessons
  * --append - if exists, the script will add the new quarter to the existing database
 
+You will get database file of module. If you have recent version of Android then it will be difficult to place this file to the folder of application.
+Right way is to publish this file in registry. as descibed in manual (MyBible for Android – extra module registries)[https://mybible.zone/en/android/extra-registries/].
+You can use [registry file from this project](https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-en-ad.devotions.registry.json) and replace links to files in this project to place where your files published.
+
 ### Prerequisites
 
 Before using this tool must be installed
@@ -59,3 +63,19 @@ The days from previous year of the current lesson added to the first day of curr
 Introduction added to first day of quarter.  
 
 Data pulled from advantech.io https://github.com/Adventech/adventech.io
+
+## How to add modules from this repository to your MyBible application
+
+Open your MyBible application.
+
+Tap three dot in the uper right corner -> tap "Modules" -> tap three dot in the uper right corner -> tap "Extra module registries" -> tap "+" in the upper right corner
+
+Fill URL field with URL of registry file for your language:
+
+Russian - `https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-ru-ad.devotions.registry.json`  
+English - `https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-en-ad.devotions.registry.json`  
+Spanish - `https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-es-ad.devotions.registry.json`  
+
+If you want Sabbath School module for other language then ask author <juzujka@gmail.com> or make it for yourself as described in the [Getting started](#getting-started) section.
+
+Now you can find Sabbath School modules in the list of devotions.

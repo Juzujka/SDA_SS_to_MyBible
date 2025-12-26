@@ -10,6 +10,7 @@
  
 """
 import regex as re
+import unicodedata
 
 db_info_description_title = "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día"
 db_info_description_version_adult = "para adultos"
@@ -23,16 +24,27 @@ db_info_description_day = "el dia"
 
 def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Spanish"""
-    #inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+
+    #inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = re.sub(r'(\d+|\s)al\s', r'\1-', inp_tag_text)	# replace 'al' after digit or space with '-'
+    # Replace "al" after digit with "-"
+    #inp_tag_text = re.sub(r'(?<=\d|\s)al', '-', inp_tag_text)
+    
+    inp_tag_text = re.sub(r'((?<=[0-9])+[a-d])', '', inp_tag_text)
+
     inp_tag_text = inp_tag_text.replace("–", "-")
     inp_tag_text = inp_tag_text.replace("'", "’")
     inp_tag_text = inp_tag_text.replace(" y ", "; ")
     inp_tag_text = inp_tag_text.replace(" e ", "; ")
-    inp_tag_text = inp_tag_text.replace(" al ", "-")
     inp_tag_text = inp_tag_text.replace(" a ", " ")
+    inp_tag_text = inp_tag_text.replace(unicodedata.normalize("NFKD", ", capítulo"), " ")
     inp_tag_text = inp_tag_text.replace(" capítulo ", " ")
     inp_tag_text = inp_tag_text.replace(" capítulos ", " ")
+    
+    #remove 'Envi'
+    inp_tag_text = re.compile(re.escape('envi'), re.IGNORECASE).sub('', inp_tag_text)
+    
+    inp_tag_text = inp_tag_text.replace("envi", " ")
     inp_tag_text = inp_tag_text.replace("Los hechos de los apóstoles", "Hechos")
     inp_tag_text = inp_tag_text.replace("vers. ", ":")
     inp_tag_text = inp_tag_text.replace("ver. ", ":")
@@ -63,9 +75,11 @@ book_index_to_MyBible = dict([\
 ('Deut',50),\
 ('Josué',60),\
 ('Josué',60),\
+('Josue',60),\
 ('Jos',60),\
 ('Jueces',70),\
 ('Juec',70),\
+('Jue',70),\
 ('Rut',80),\
 ('1Samuel',90),\
 ('1Sam',90),\
@@ -138,6 +152,7 @@ book_index_to_MyBible = dict([\
 ('Hab',420),\
 ('Habacuc',420),\
 ('Sofonías',430),\
+('Sofonías',430),\
 ('Sof',430),\
 ('Hag',440),\
 ('Hageo',440),\
@@ -198,6 +213,7 @@ book_index_to_MyBible = dict([\
 ('Tit',630),\
 ('Ti',630),\
 ('Filemón',640),\
+('Filemón',640),\
 ('Heb',650),\
 ('Hebreos',650),\
 ('Judas',720),\
