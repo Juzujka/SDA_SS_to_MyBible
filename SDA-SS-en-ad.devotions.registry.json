@@ -1,7 +1,7 @@
 {
   "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-en-ad.devotions.registry.json",
   "file_name": "SDA-SS-en-ad.devotions.registry.json",
-  "description": "Sabath School Lessons of the SDA church, 2025",
+  "description": "Sabath School Lessons of the SDA church",
   "modules":
   [
     {
@@ -35,6 +35,14 @@
        "description": "Sabbath School lessons of SDA Church, 2025",
        "update_date": "2025-10-01",
        "update_info": "(2024-12-27) lessons for 25q1 added\n(2025-03-23) lessons for 25q2 added: `Allusions, Images, Symbols: How to Study Bible Prophecy`\n(2025-07-04) lessons for 25q3 added: `Exodus`\n(2025-09-27) lessons for 25q4 added: 'Lessons of Faith from Joshua'"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-en-ad'26.devotions.SQLite3",
+       "file_name": "SS-en-ad'26.devotions.SQLite3",
+       "language_code": "en",
+       "description": "Sabbath School lessons of SDA Church, 2026",
+       "update_date": "2025-12-26",
+       "update_info": "(2025-12-26) lessons for 26q1 added: 'Uniting Heaven and Earth. Christ in Philippians and Colossians'"
     }
   ]
 }

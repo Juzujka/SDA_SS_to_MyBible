@@ -1,7 +1,7 @@
 {
   "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-es-ad.devotions.registry.json",
   "file_name": "SDA-SS-es-ad.devotions.registry.json",
-  "description": "Sabath School Lessons of the SDA church, 2025",
+  "description": "Sabath School Lessons of the SDA church",
   "modules":
   [
     {
@@ -35,7 +35,16 @@
        "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2025",
        "update_date": "2025-10-01",
        "update_info": "(2024-12-28) Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2025\n(2025-03-23) lecciones agregadas del trimestre 2: `Alusiones, imágenes y símbolos: Cómo estudiar la profecía bíblica`\n(2025-07-04) lecciones agregadas del trimestre 3: `El Éxodo: viaje a la Tierra Prometida`\n(2025-09-27) lecciones agregadas del trimestre 4: `Lecciones de Josué acerca de la fe`"
+    },
+    {
+       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-es-ad'26.devotions.SQLite3",
+       "file_name": "SS-es-ad'26.devotions.SQLite3",
+       "language_code": "es",
+       "description": "Lecciones de la Escuela Sabática de la Iglesia Adventista del Séptimo Día, 2026",
+       "update_date": "2025-12-26",
+       "update_info": "(2025-12-26) lecciones agregadas del trimestre 1: `Uniendo el cielo y la tierra`"
     }
+
   ]
 }
 
