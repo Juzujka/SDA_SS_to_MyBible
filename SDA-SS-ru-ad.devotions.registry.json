@@ -2,40 +2,46 @@
   "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-ru-ad.devotions.registry.json",
   "file_name": "SDA-SS-ru-ad.devotions.registry.json",
   "description": "Sabath School Lessons of the SDA church, 2025",
-  "modules":
-  [
+  "modules": [
     {
-       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'22.devotions.SQLite3",
-       "file_name": "SS-ru-ad'22.devotions.SQLite3",
-       "language_code": "ru",
-       "description": "Урочники субботней школы церкви АСД, 2022 год",
-       "update_date": "2024-04-03",
-       "update_info": "initial"
+      "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'22.devotions.SQLite3",
+      "file_name": "SS-ru-ad'22.devotions.SQLite3",
+      "language_code": "ru",
+      "description": "Урочники субботней школы церкви АСД, 2022 год",
+      "update_date": "2024-04-03",
+      "update_info": "initial"
     },
     {
-       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'23.devotions.SQLite3",
-       "file_name": "SS-ru-ad'23.devotions.SQLite3",
-       "language_code": "ru",
-       "description": "Урочники субботней школы церкви АСД, 2023 год",
-       "update_date": "2024-04-03",
-       "update_info": "initial"
+      "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'23.devotions.SQLite3",
+      "file_name": "SS-ru-ad'23.devotions.SQLite3",
+      "language_code": "ru",
+      "description": "Урочники субботней школы церкви АСД, 2023 год",
+      "update_date": "2024-04-03",
+      "update_info": "initial"
     },
     {
-       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'24.devotions.SQLite3",
-       "file_name": "SS-ru-ad'24.devotions.SQLite3",
-       "language_code": "ru",
-       "description": "Урочники субботней школы церкви АСД, 2024 год",
-       "update_date": "2024-11-04",
-       "update_info": "lessons for quarter 4 added, +commentaries for lessons 6 and later"
+      "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'24.devotions.SQLite3",
+      "file_name": "SS-ru-ad'24.devotions.SQLite3",
+      "language_code": "ru",
+      "description": "Урочники субботней школы церкви АСД, 2024 год",
+      "update_date": "2024-11-04",
+      "update_info": "lessons for quarter 4 added, +commentaries for lessons 6 and later"
     },
     {
-       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'25.devotions.SQLite3",
-       "file_name": "SS-ru-ad'25.devotions.SQLite3",
-       "language_code": "ru",
-       "description": "Урочники субботней школы церкви АСД, 2025 год",
-       "update_date": "2025-10-01",
-       "update_info": "(2025-01-07) lessons for 2025q1 added\n(2025-04-05) lessons for 2025q2 added\n(2025-07-04) добавлены уроки за 2025q3: `Исход. Путешествие в Землю обетованную\n(2025-08-23) добавлены комментарии для учителей к урокам за 2025q3: `Исход. Путешествие в Землю обетованную`\n(2025-10-01) 2025q4: `Уроки веры из книги Иисуса Навина`"
+      "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'25.devotions.SQLite3",
+      "file_name": "SS-ru-ad'25.devotions.SQLite3",
+      "language_code": "ru",
+      "description": "Урочники субботней школы церкви АСД, 2025 год",
+      "update_date": "2025-10-01",
+      "update_info": "(2025-01-07) добавлены уроки за 2025q1\n(2025-04-05) добавлены уроки за 2025q2\n(2025-07-04) добавлены уроки за 2025q3: `Исход. Путешествие в Землю обетованную`\n(2025-08-23) добавлены комментарии для учителей к урокам за 2025q3: `Исход. Путешествие в Землю обетованную`\n(2025-10-01) 2025q4: `Уроки веры из книги Иисуса Навина`"
+    },
+    {
+      "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'26.devotions.SQLite3",
+      "file_name": "SS-ru-ad'26.devotions.SQLite3",
+      "language_code": "ru",
+      "description": "Пособие по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня для взрослых 2026-01",
+      "update_date": "2025-12-28",
+      "update_info": "(2025-12-28) добавлены уроки за 26q1: `Соединяя землю с небом: Христос в посланиях к филиппийцам и колоссянам`"
     }
   ]
 }
-

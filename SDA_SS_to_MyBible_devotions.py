@@ -280,6 +280,7 @@ class lesson(text_material):
         for lesson_info_item in self.lessons_info:
             if lesson_info_item.get('id') == 'teacher-comments':
                 # create comment object and process comment
+                print("get comment {0:2} day {1} {2}/days/teacher-comments/read/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
                 self.lesson_comment = comment()
                 self.lesson_comment.set_lang_code(self.lang_code)
                 self.lesson_comment.get_content(self.lesson_full_path, comment_force_update)
@@ -845,6 +846,147 @@ class db_MyBible_devotions_SS:
             self.db_conn.commit()
             self.db_conn.close()
 
+    def get_registry_filename(self):
+        """ returns registry file name for the current language and lesson type """
+        lesson_type_index = self.lesson_type
+        if (self.lesson_type == ''):
+            lesson_type_index = 'ad'
+        registry_filename = "SDA-SS-{0}-{1}.devotions.registry.json".format(self.lang_code, lesson_type_index)
+        return registry_filename
+
+    def load_registry_file(self, registry_filename):
+        """ loads existing registry file or creates a new one if it doesn't exist """
+        registry_data = {
+            "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/{0}".format(registry_filename),
+            "file_name": registry_filename,
+            "description": "Sabath School Lessons of the SDA church",
+            "modules": []
+        }
+        
+        if os.path.exists(registry_filename):
+            try:
+                with open(registry_filename, 'r', encoding='utf-8') as f:
+                    registry_data = json.load(f)
+            except Exception as e:
+                print(f"Error loading registry file {registry_filename}: {e}")
+                # Continue with default structure
+        
+        return registry_data
+
+    def save_registry_file(self, registry_data, registry_filename):
+        """ saves registry file """
+        try:
+            with open(registry_filename, 'w', encoding='utf-8') as f:
+                json.dump(registry_data, f, ensure_ascii=False, indent=2)
+            print(f"Registry file saved: {registry_filename}")
+        except Exception as e:
+            print(f"Error saving registry file {registry_filename}: {e}")
+
+    def find_module_entry(self, registry_data, module_filename):
+        """ finds existing module entry or returns None """
+        for i, module in enumerate(registry_data['modules']):
+            if module['file_name'] == module_filename:
+                return i, module
+        return None, None
+
+    def generate_update_info(self, operation, quarters_added=None, commentaries_updated=False, year=None):
+        """ generates update info message based on operation """
+        current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        
+        if operation == "new":
+            if quarters_added:
+                if len(quarters_added) == 1:
+                    # Get quarter title from SS_year instance using quarter number
+                    quarter_title = ""
+                    for quarter in self.SS_year_inst.quarters:
+                        if quarter.quart_N == quarters_added[0]:
+                            quarter_title = quarter.quarter_title
+                            break
+                    return f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}: `{quarter_title}`"
+                else:
+                    return f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}"
+            else:
+                return "initial"
+        
+        elif operation == "append":
+            update_parts = []
+            if quarters_added:
+                for quarter_num in quarters_added:
+                    # Get quarter title from SS_year instance using quarter number
+                    quarter_title = ""
+                    for quarter in self.SS_year_inst.quarters:
+                        if quarter.quart_N == quarter_num:
+                            quarter_title = quarter.quarter_title
+                            break
+                    update_parts.append(f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarter_num:02}: `{quarter_title}`")
+            
+            if commentaries_updated:
+                update_parts.append(f"({current_date}) добавлены комментарии для учителей к урокам")
+            
+            if len(update_parts) == 1:
+                return update_parts[0]
+            else:
+                return "\n".join(update_parts)
+        
+        elif operation == "comment_update":
+            return f"({current_date}) обновлены комментарии для учителей"
+        
+        return f"({current_date}) обновлено"
+
+    def update_registry_file(self, comment_force_update=False):
+        """ updates registry file after database operations """
+        registry_filename = self.get_registry_filename()
+        registry_data = self.load_registry_file(registry_filename)
+        
+        module_filename = self.get_def_file_name()
+        existing_module_idx, existing_module = self.find_module_entry(registry_data, module_filename)
+        
+        # Determine operation type and generate update info
+        operation = "new"
+        quarters_added = []
+        
+        if existing_module:
+            operation = "append"
+            # Find which quarters are new by comparing with existing database
+            # We know which quarters we just processed from SS_year_inst.quarters
+            for quarter in self.SS_year_inst.quarters:
+                quarters_added.append(quarter.quart_N)
+        else:
+            # This is a new module, get all quarters for this year
+            for quarter in self.SS_year_inst.quarters:
+                quarters_added.append(quarter.quart_N)
+        
+        # Generate update info
+        update_info = self.generate_update_info(
+            operation, 
+            quarters_added if quarters_added else None, 
+            comment_force_update,
+            str(self.year)
+        )
+        
+        # Create or update module entry
+        module_entry = {
+            "download_url": f"https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/{module_filename}",
+            "file_name": module_filename,
+            "language_code": self.lang_code,
+            "description": self.get_db_description_text(),
+            "update_date": datetime.datetime.now().strftime("%Y-%m-%d"),
+            "update_info": update_info
+        }
+        
+        if existing_module:
+            # Update existing entry
+            registry_data['modules'][existing_module_idx] = module_entry
+        else:
+            # Add new entry
+            registry_data['modules'].append(module_entry)
+        
+        # Sort modules by year in filename (to keep chronological order)
+        registry_data['modules'].sort(key=lambda x: int(x['file_name'].split("'")[1][:2]))
+        
+        # Save the updated registry file
+        self.save_registry_file(registry_data, registry_filename)
+
     def __init__(self):
         # default parameters
         self.lang_code = 'ru'    # language code for sabbath school text
@@ -885,6 +1027,32 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     inp_tag_text = unicodedata.normalize("NFKD", inp_tag_text)  # replace \xa0 (unbreaking space) with space
     # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
+    
+    # Fix: Handle commas that separate different references (e.g., "Рим.12:3, 1Кор.4:6")
+    # The rule: if comma is followed by a pattern that looks like a book name (digit + letters, or letters + digit),
+    # then treat it as a reference separator
+    # More sophisticated approach: look for comma followed by book-like pattern that indicates a new reference
+    
+    # Pattern 1: comma followed by digit + letters + number (like ", 1Кор.4:6")
+    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Яа-я\p{Ll}\p{M}\’\']+\s*\d)', r'; \1', inp_tag_text)
+    
+    # Pattern 2: comma followed by letters that look like book names (like ", Рим.12:3")
+    # This is trickier - look for comma followed by uppercase letter followed by more letters
+    inp_tag_text = regex.sub(r',\s*([А-Я][а-я\p{Ll}\p{M}\’\']{2,}\s*\d)', r'; \1', inp_tag_text)
+    
+    # Pattern 3: handle the specific case where a digit immediately follows letters of a book name
+    # This addresses the original requirement: "если одна цифра идёт сразу за боле чем двумя буквами, первая из которых заглавная"
+    # For example: "Рим.12:3, 1Кор.4:6" should become "Рим.12:3; 1Кор.4:6"
+    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\.(\d+:\d+)\s*,\s*(\d)([А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1.\2; \3\4', inp_tag_text)
+    
+    # Also handle case where there's no period after the first book name
+    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\s*(\d+:\d+)\s*,\s*(\d)([А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1 \2; \3\4', inp_tag_text)
+    
+    # More general pattern: handle comma followed by digit + letters that look like book names
+    # This addresses the core requirement more broadly
+    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Я][а-я\p{Ll}\p{M}\’\']+\.?\s*\d)', r'; \1', inp_tag_text)
+    
+    # Add semicolon at the end for consistent processing
     inp_tag_text = inp_tag_text + ";"
     #split references into list of references to add book names to references without book name
     inp_tag_list = inp_tag_text.split(";")
@@ -1063,6 +1231,7 @@ if __name__ == '__main__':
     parser.add_argument(      "--lang"  ,   action = "store",      help = "language", default = "ru")
     parser.add_argument(      "--type"  ,   action = "store",      help = "type of lesson", default = "")
     parser.add_argument(      "--comm_update", action = "store_true", help = "force updating commentaries from server",  default = False)
+    parser.add_argument(      "--update_registry", action = "store_true", help = "force updating registry file",  default = False)
     parser.add_argument(      "--test"  ,   action = "store_true", default=False)
     parser.add_argument( "--test_print_day"   ,   action = "store_true", help = "print selected day to console", default=False)
     parser.add_argument( "--test_n_quart" ,   type = int, help="quarter for test", default = 1)
@@ -1174,6 +1343,9 @@ if __name__ == '__main__':
                                 devotions.update_detailed_info()
                                 print ("-- create_table_devotions --")
                                 devotions.create_table_devotions(args.comm_update)
+                                if args.update_registry or True:  # Always update registry after successful operations
+                                    print ("-- update_registry_file() --")
+                                    devotions.update_registry_file(args.comm_update)
                         else:
                             print("unable to open file with database {0}".format(args.db_file))
                     else:
@@ -1197,6 +1369,9 @@ if __name__ == '__main__':
                             # create table with devotions in database file
                             print ("-- create_table_devotions --")
                             devotions.create_table_devotions()
+                            if args.update_registry or True:  # Always update registry after successful operations
+                                print ("-- update_registry_file() --")
+                                devotions.update_registry_file()
                         else:
                             print("Error: unable to create database {0}".format(args.db_file))
                     else:

@@ -19,6 +19,7 @@ db_info_description_from_author = """Для отправки замечаний 
 db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
 db_info_description_lesson = "урок"
 db_info_description_day = "день"
+registry_info_added_lessons_for = "добавлены уроки за"
 
 def ref_tag_preprocess(inp_tag_text):
     """adopting references in lessons in Russian"""

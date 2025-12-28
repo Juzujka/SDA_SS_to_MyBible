@@ -20,6 +20,7 @@ db_info_description_from_author = """To send bugs and wishes on the module, use 
 db_info_description_origin_text = """created by Egor Ibragimov, juzujka@gmail.com\nthe text is taken from sabbath-school.adventech.io"""
 db_info_description_lesson = "lesson"
 db_info_description_day = "day"
+registry_info_added_lessons_for = "added lessons for"
 
 def ref_tag_preprocess(inp_tag_text):
     """ function adopts references
