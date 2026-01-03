@@ -889,9 +889,14 @@ class db_MyBible_devotions_SS:
                 return i, module
         return None, None
 
-    def generate_update_info(self, operation, quarters_added=None, commentaries_updated=False, year=None):
+    def generate_update_info(self, operation, quarters_added=None, commentaries_updated=False, year=None, existing_update_info=None):
         """ generates update info message based on operation """
         current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+        
+        # Start with existing update info if available
+        update_parts = []
+        if existing_update_info:
+            update_parts = existing_update_info.split('\n')
         
         if operation == "new":
             if quarters_added:
@@ -902,14 +907,16 @@ class db_MyBible_devotions_SS:
                         if quarter.quart_N == quarters_added[0]:
                             quarter_title = quarter.quarter_title
                             break
-                    return f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}: `{quarter_title}`"
+                    new_entry = f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}: `{quarter_title}`"
+                    update_parts.append(new_entry)
                 else:
-                    return f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}"
+                    new_entry = f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarters_added[0]}"
+                    update_parts.append(new_entry)
             else:
-                return "initial"
+                new_entry = "initial"
+                update_parts.append(new_entry)
         
         elif operation == "append":
-            update_parts = []
             if quarters_added:
                 for quarter_num in quarters_added:
                     # Get quarter title from SS_year instance using quarter number
@@ -918,20 +925,20 @@ class db_MyBible_devotions_SS:
                         if quarter.quart_N == quarter_num:
                             quarter_title = quarter.quarter_title
                             break
-                    update_parts.append(f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarter_num:02}: `{quarter_title}`")
+                    new_entry = f"({current_date}) {bible_codes.registry_info_added_lessons_for} {year[-2:]}q{quarter_num}: `{quarter_title}`"  # Fixed: removed :02 format
+                    update_parts.append(new_entry)
             
             if commentaries_updated:
-                update_parts.append(f"({current_date}) добавлены комментарии для учителей к урокам")
-            
-            if len(update_parts) == 1:
-                return update_parts[0]
-            else:
-                return "\n".join(update_parts)
+                new_entry = f"({current_date}) добавлены комментарии для учителей к урокам"
+                update_parts.append(new_entry)
         
         elif operation == "comment_update":
-            return f"({current_date}) обновлены комментарии для учителей"
+            new_entry = f"({current_date}) обновлены комментарии для учителей"
+            update_parts.append(new_entry)
         
-        return f"({current_date}) обновлено"
+        # Remove empty strings and join with newlines
+        update_parts = [part for part in update_parts if part.strip()]
+        return "\n".join(update_parts)
 
     def update_registry_file(self, comment_force_update=False):
         """ updates registry file after database operations """
@@ -956,12 +963,16 @@ class db_MyBible_devotions_SS:
             for quarter in self.SS_year_inst.quarters:
                 quarters_added.append(quarter.quart_N)
         
+        # Get existing update info to preserve previous entries
+        existing_update_info = existing_module['update_info'] if existing_module else None
+        
         # Generate update info
         update_info = self.generate_update_info(
             operation, 
             quarters_added if quarters_added else None, 
             comment_force_update,
-            str(self.year)
+            str(self.year),
+            existing_update_info  # Pass existing update info to preserve previous entries
         )
         
         # Create or update module entry
@@ -1017,10 +1028,10 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
     # regular expression for selecting reference to book name with verses in particular book
                             #   /  book name                                         \ /    head, verse repeatable after selected book name                                                                                    \ 
-    find_refs = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+\.?\s*(?:\d+(?:[\:\-\,]\d+)?(?:\s*[\-\,]\s*\d+)?(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))?(?:\s*)?)*")
+    find_refs = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+\.?\s*(?:\d+(?:[\:\-\,\u2013]\d+)*(?:\s*[\-\,\u2013]\s*\d+)*(?::\d+|(?:\s*[\p{Lu}]?[\p{Ll}\’\']+\s*\d+:\d+))*(?:\s*)?)*")
 
     # regular expression for selecting book name from reference with book name, head and verse
-    parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\']+")
+    parse_ref = regex.compile(r"(?:\d\s*)?(?:[\p{Lu}]\.\s)?[\p{Lu}]?[\p{Ll}\p{M}\’\"]+")
 
     inp_tag_text_src = inp_tag.get_text()
     inp_tag_text = inp_tag_text_src
@@ -1028,29 +1039,26 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     
-    # Fix: Handle commas that separate different references (e.g., "Рим.12:3, 1Кор.4:6")
-    # The rule: if comma is followed by a pattern that looks like a book name (digit + letters, or letters + digit),
-    # then treat it as a reference separator
-    # More sophisticated approach: look for comma followed by book-like pattern that indicates a new reference
+    # IMPROVED APPROACH: Better handling of comma separation based on context
+    # According to MyBible documentation:
+    # B:<book number> <chapter number>:<verse number #1>,<verse number #2>[<more comma-separated verse numbers>]
+    # This means commas can separate multiple verses within the same chapter/reference
     
-    # Pattern 1: comma followed by digit + letters + number (like ", 1Кор.4:6")
-    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Яа-я\p{Ll}\p{M}\’\']+\s*\d)', r'; \1', inp_tag_text)
+    # Pattern 1: comma followed by digit + letters that look like a book name (like ", 1Кор.4:6" where 1Кор is a new book)
+    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Яа-я\p{Ll}\p{M}\’\']+\s*[А-Я][а-я\p{Ll}\p{M}\’\']*(?:\.|\s+))', r'; \1', inp_tag_text)
     
-    # Pattern 2: comma followed by letters that look like book names (like ", Рим.12:3")
-    # This is trickier - look for comma followed by uppercase letter followed by more letters
-    inp_tag_text = regex.sub(r',\s*([А-Я][а-я\p{Ll}\p{M}\’\']{2,}\s*\d)', r'; \1', inp_tag_text)
+    # Pattern 2: comma followed by letters that start a new book name (like ", Рим.12:3" where Рим is a new book)
+    inp_tag_text = regex.sub(r',\s*([А-Я][а-я\p{Ll}\p{M}\’\']+\s*(?:\.|\d))', r'; \1', inp_tag_text)
     
-    # Pattern 3: handle the specific case where a digit immediately follows letters of a book name
-    # This addresses the original requirement: "если одна цифра идёт сразу за боле чем двумя буквами, первая из которых заглавная"
-    # For example: "Рим.12:3, 1Кор.4:6" should become "Рим.12:3; 1Кор.4:6"
-    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\.(\d+:\d+)\s*,\s*(\d)([А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1.\2; \3\4', inp_tag_text)
+    # Pattern 3: handle the specific case where a digit followed by letters indicates a new book name
+    # This addresses the original requirement: "Рим.12:3, 1Кор.4:6" should become "Рим.12:3; 1Кор.4:6"
+    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\.(\d+:\d+)\s*,\s*(\d\s*[А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1.\2; \3', inp_tag_text)
     
     # Also handle case where there's no period after the first book name
-    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\s*(\d+:\d+)\s*,\s*(\d)([А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1 \2; \3\4', inp_tag_text)
+    inp_tag_text = regex.sub(r'([А-Я][а-я\p{Ll}\p{M}\’\']{2,})\s*(\d+:\d+)\s*,\s*(\d\s*[А-Я][а-я\p{Ll}\p{M}\’\']+\.\d+:\d+)', r'\1 \2; \3', inp_tag_text)
     
-    # More general pattern: handle comma followed by digit + letters that look like book names
-    # This addresses the core requirement more broadly
-    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Я][а-я\p{Ll}\p{M}\’\']+\.?\s*\d)', r'; \1', inp_tag_text)
+    # More general pattern: separate only when comma is followed by what looks like a new book name
+    inp_tag_text = regex.sub(r',\s*(\d\s*[А-Я][а-я\p{Ll}\p{M}\’\']+\.?\s*[А-Яа-я\p{Ll}\p{M}\’\']*\s*\d)', r'; \1', inp_tag_text)
     
     # Add semicolon at the end for consistent processing
     inp_tag_text = inp_tag_text + ";"
@@ -1112,60 +1120,32 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         if (DEBUG_LEVEL > 0):
             print("ref: {0} parsed is {1} name is {2}, N is {3}".format(ref, parse_ref.match(ref), book_name, book_N))
         numeric_part = (ref[parse_ref.match(ref).span()[1] + 1:]).replace(" ", "")
-        # if numeric part includes list of verses separated by commas like "Mt. 1:2-4, 5, 7, 9" then divide into list of references
-        numeric_part_list = numeric_part.split(",")                 # divides reference into parts
-        numeric_part_list = list(filter(None, numeric_part_list))   # removes empty strings from list
-        # convert consecutive number into range
-        to_continue = len(numeric_part_list) > 1    # initializes mark to continue by checking after current element there is one or more elements
-        ind = 0                                     # index of the current element
-        while(to_continue):
-            repeat_index = False                    # if found incorrect part then deletes it and repeat without it
-            if (numeric_part_list[ind]) == "":      # checks if it is empty element
-                del numeric_part_list[ind]          # deletes empty element
-            else:
-                if (numeric_part_list[ind].find(":") >= 0):             # checks is it element with head number
-                    verse_part = numeric_part_list[ind].split(":")[1]   # if it is then remembers part with verses, it is after ":"
-                else:
-                    verse_part = numeric_part_list[ind]                 # else all element is verses
-                try:
-                    if (verse_part.find("-") >= 0):                         # checks element is range
-                        range_end_number = int(verse_part.split("-")[1])    # if it is then remembers end of range, it will be used to concatenating with next verses
-                    else:
-                        range_end_number = int(verse_part)                  # if it is not range, then it is a single verse and it is the end of range itself
-                except ValueError:
-                    print("incorrect verse found while handling {0}".format(inp_tag))   # print error message and diagnostic information
-                    print("reference is {0}".format(ref))
-                    print("numeric part is {0}; verse part is not integer: {1}".format(numeric_part_list[ind], verse_part))
-                    del numeric_part_list[ind]                              # deletes incorrect element
-                    repeat_index = True
-                if not(repeat_index):
-                    if (ind < len(numeric_part_list) - 1):  # current element is not the last element
-                        if (numeric_part_list[ind + 1].find("-") >= 0 or numeric_part_list[ind + 1].find(":") >= 0): # next element is range or in new head, skip
-                            pass
-                        else:
-                            try:
-                                numeric_part_next_value = int(numeric_part_list[ind + 1])
-                            except ValueError:
-                                print("incorrect verse found while handling {0}".format(inp_tag))   # print error message and diagnostic information
-                                print("reference is {0}".format(ref))
-                                print("numeric part in next element branch is {0}".format(numeric_part_list[ind + 1]))
-                                del numeric_part_list[ind + 1]                              # deletes incorrect element
-                                repeat_index = True
-                            if not(repeat_index):
-                                if (numeric_part_next_value == (range_end_number + 1)):
-                                    if (numeric_part_list[ind].find("-") >= 0): # element is range
-                                        numeric_part_list[ind] = numeric_part_list[ind].split("-") + "-" + numeric_part_list[ind + 1]
-                                    else:
-                                        numeric_part_list[ind] = numeric_part_list[ind] + "-" + numeric_part_list[ind + 1]
-                                    del numeric_part_list[ind + 1]
-            if (ind < len(numeric_part_list) - 1):  # checks if it is element after current element
-                if not(repeat_index):               # if element deleted then keep current value of index, it points to the next element
-                    ind = ind + 1                   # increment index for handling the next element 
-            else:
-                to_continue = False                 # if it is the last element then finishes
-    
-        # and add head numbers to verses
-        if len(numeric_part_list) > 1: # if it is a reference with heads only then skip
+        
+        # Check if this is a single-chapter book to handle commas appropriately
+        # Use the MyBible book codes to identify single-chapter books (language-independent)
+        is_single_chapter_book = (book_N in [380, 640, 700, 710, 720])  # Obadiah, Philemon, 2 John, 3 John, Jude
+        
+        if is_single_chapter_book:
+            # For single-chapter books, the numeric part should be handled as comma-separated verse references
+            # For example: "Флм. 1, 10–12, 15, 16" should become multiple references
+            # According to the documentation, this means "Philemon 1:1, 10-12, 15, 16"
+            # So we need to split by comma and create separate references for each part
+            numeric_part_list = numeric_part.split(',')
+            numeric_part_list = [part.strip() for part in numeric_part_list if part.strip()]
+        else:
+            # For multi-chapter books, we need to be more careful
+            # The key insight from the MyBible documentation is that we should handle
+            # comma-separated verse numbers within the same chapter properly
+            # For example: "Быт. 1:2, 4, 6" -> Genesis 1:2, 4, 6 (verses in same chapter)
+            # But "Быт. 1-3, 5" -> Genesis 1-3, 5 (chapters in same book)
+            
+            # For multi-chapter books, if the reference contains semicolons from our preprocessing,
+            # those indicate different book references that were separated
+            # Otherwise, treat as one reference and don't split by commas
+            numeric_part_list = [numeric_part]  # Default: keep as one reference
+        
+        # and add head numbers to verses if needed (for multi-part references in multi-chapter books)
+        if len(numeric_part_list) > 1 and not is_single_chapter_book:
             head_number = ""
             for i1, numeric_part_elem in enumerate(numeric_part_list) :
                 if (numeric_part_elem.find(":") >= 0):                      # element considers head number
@@ -1175,14 +1155,13 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
             
         # concatenate reference from reference header "B:",
         # book number and head number with verse number
-        for numeric_part_elem in reversed(numeric_part_list) :
+        for numeric_part_elem in reversed(numeric_part_list):
             if (book_N == 380 or book_N == 700 or book_N == 710 or book_N == 720 or book_N == 640):
                 # if book Obadiah or 2 John or 3 John or Jude or Philemon,
                 # which has one head then add to the reference head one "1:"
                 MyBible_ref = "B:{0} 1:{1}".format(book_N, numeric_part_elem)
             else:
                 MyBible_ref = "B:{0} {1}".format(book_N, numeric_part_elem)
-            # if reference considers comma separated list then divide list into list of references
             
             if (DEBUG_LEVEL > 0):
                 print("MyBible ref: {0}".format(MyBible_ref))
@@ -1283,7 +1262,7 @@ if __name__ == '__main__':
             # extracts from xml received in response title of lesson, description
             quarter_title = r.json().get('quarterly').get('title')
             quarter_description = r.json().get('quarterly').get('description')
-            print("quarter {0}-{1:02}{2}"\
+            print("quarter {0}q{1}{2}"\
                   .format(args.year, args.test_n_quart, lesson_type_string))
             print("*** title: {0}".format(quarter_title))
             lessons_block = r.json().get('lessons')
