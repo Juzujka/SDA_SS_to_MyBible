@@ -1039,6 +1039,10 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
     # preprocessing for converting references from text materials to the common format
     inp_tag_text = bible_codes.ref_tag_preprocess(inp_tag_text)
     
+    # Handle spaces after colons specifically for Spanish references
+    # This handles the case where Spanish references have spaces like "Génesis 1: 26, 27"
+    inp_tag_text = regex.sub(r':\s+', ':', inp_tag_text)
+    
     # IMPROVED APPROACH: Better handling of comma separation based on context
     # According to MyBible documentation:
     # B:<book number> <chapter number>:<verse number #1>,<verse number #2>[<more comma-separated verse numbers>]

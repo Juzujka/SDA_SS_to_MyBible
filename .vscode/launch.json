@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Current File with Arguments",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "SDA_SS_to_MyBible_devotions - Year 2026 Russian",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/SDA_SS_to_MyBible_devotions.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--year",
+                "2026",
+                "--lang",
+                "ru"
+            ]
+        }
+    ]
+}
