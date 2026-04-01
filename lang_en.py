@@ -63,6 +63,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("is verses", ":")
     inp_tag_text = inp_tag_text.replace("Verses", ":")
     inp_tag_text = inp_tag_text.replace("verses", ":")
+    inp_tag_text = inp_tag_text.replace("verse", "-")
     # finds books with names starts with digit, adds separator ';' before book name
     # because of references divided with commas, it is difficult to separate book name from previous reference
     # this part of code searches every name which starts from digit in reference
