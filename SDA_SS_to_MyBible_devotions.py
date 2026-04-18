@@ -815,7 +815,7 @@ class db_MyBible_devotions_SS:
                         if not(lesson.lesson_comment == None):
                             day_content_handled += "<h4>{0}</h4>{1}".format(lesson.lesson_comment.title, lesson.lesson_comment.content)
                     if (not(comment_force_update)):
-                        exec_string = '''INSERT INTO devotions VALUES ( :day, :devotion )'''
+                        exec_string = '''INSERT OR REPLACE INTO devotions VALUES ( :day, :devotion )'''
                     else :
                         exec_string = '''UPDATE devotions SET devotion =  :devotion  WHERE day = :day '''
                     if DEBUG_LEVEL > 0:
@@ -1311,6 +1311,16 @@ if __name__ == '__main__':
                                 # remove from list the quarters which are already in database
                                 #for i in range(0, devotions.db_end_quart):
                                 #    devotions.SS_year_inst.quarters_list_year.pop(0)
+                                if devotions.db_end_quart > 0:
+                                    # remove from list the quarters which are already in database
+                                    print(f"Skipping first {devotions.db_end_quart} quarter(s) already in database")
+                                    for _ in range(devotions.db_end_quart):
+                                        if devotions.SS_year_inst.quarters_list_year:
+                                            removed_quarter = devotions.SS_year_inst.quarters_list_year.pop(0)
+                                            print(f"Skipped quarter: {removed_quarter.get('id')}")
+                                        else:
+                                            break
+                                    print(f"Appending quarters: {[q.get('id') for q in devotions.SS_year_inst.quarters_list_year]}")
                                 print ("list of quarters to add")
                                 # print quarters which will be added
                                 for index, i_quarter in enumerate(devotions.SS_year_inst.quarters_list_year):
