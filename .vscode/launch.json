@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",
@@ -22,7 +23,36 @@
                 "--year",
                 "2026",
                 "--lang",
-                "ru"
+                "ru",
+                "--append"
+            ]
+        },
+        {
+            "name": "SDA_SS_to_MyBible_devotions - Year 2026 English",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/SDA_SS_to_MyBible_devotions.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--year",
+                "2026",
+                "--lang",
+                "en",
+                "--append"
+            ]
+        },
+                {
+            "name": "SDA_SS_to_MyBible_devotions - Year 2026 Spanish",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/SDA_SS_to_MyBible_devotions.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--year",
+                "2026",
+                "--lang",
+                "es",
+                "--append"
             ]
         }
     ]

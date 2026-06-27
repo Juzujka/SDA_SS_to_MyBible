@@ -7,6 +7,7 @@ This program creates MyBible devotions modules from data from adventech.io
 
 import os
 import argparse
+import time
 import datetime
 import regex
 import sqlite3
@@ -53,38 +54,48 @@ class text_material:
         """
         self.lang_code = lang
 
-    def content_extract(self, path_to_content: str, force = False):
+    def content_extract(self, path_to_content: str, force=False):
         """
-        checks if material from path_to_content is available in the local storage
-        extracts content of material from local storage or from server
-        
-        if parameter force is True then extracts from server
+        Checks if material from path_to_content is available in local storage.
+        If not, fetches from server with retries and timeout.
         """
-        #print("content_extract {0}".format(path_to_content))
         path_local = path_to_content
-        # remove https from root directory name 
-        if path_local.startswith("https://") :
+        if path_local.startswith("https://"):
             path_local = path_local[len("https://"):]
-        # concatenate path to cache and path to extracted file within the cache
         path_to_file = self.path_to_cache + '/' + path_local
-        # check if file already exists in the cache ?
-        if (os.path.isfile(path_to_file) and not(force)):
-            # if file already exist then read from the local file
+
+        # Use cached file if exists and not forcing refresh
+        if os.path.isfile(path_to_file) and not force:
             with open(path_to_file) as inp_file:
                 self.r_json = json.load(inp_file)
-        else:
-            # get data and save to the local file
-            request_str = (path_to_content)
-            # send request and get xml  with day of lesson with its attributes
-            r = requests.get(request_str)
-            # extract content, date and title
-            folder_path = os.path.dirname(path_to_file)
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
-                #print("Directory " , folder_path ,  " Created ")
-            with open(path_to_file, 'w') as out_file:
-                json.dump(r.json(), out_file)
-            self.r_json = r.json()
+            return
+
+        # Network fetch with retries
+        request_str = path_to_content
+        max_retries = 3
+        timeout = 10  # seconds
+        delay = 2     # seconds between retries
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                print(f"Fetching {request_str} (attempt {attempt}/{max_retries})")
+                r = requests.get(request_str, timeout=timeout)
+                r.raise_for_status()  # raise HTTPError for bad status codes
+                break  # success, exit loop
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed: {e}")
+                if attempt == max_retries:
+                    raise RuntimeError(f"Failed to fetch {request_str} after {max_retries} attempts.") from e
+                print(f"Retrying in {delay} seconds...")
+                time.sleep(delay)
+
+        # Save to cache
+        folder_path = os.path.dirname(path_to_file)
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+        with open(path_to_file, 'w') as out_file:
+            json.dump(r.json(), out_file)
+        self.r_json = r.json()
 
     def get_content(self, block):
         pass
@@ -259,7 +270,7 @@ class lesson(text_material):
             # prints number of current lesson and number of current day,
             # it is useful for progress indication 
             #print("get lesson {0:2} day {1} {2}/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
-            print("get lesson {0:2} day {1} {2}/days/{1:02}/read/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
+            print("get lesson  {0:2} day {1} {2}/days/{1:02}/read/index.json".format(self.lesson_N, day_N, self.lesson_full_path))
             #self.content_extract("{0}/days/{1:02}/read/index.json".format(self.full_path, self.day_N))
             # creates a new object for the day
             curr_day = day()
@@ -1114,7 +1125,20 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
         book_name_to_find = "".join(book_name_as_list)
         book_N = bible_codes.book_index_to_MyBible.get(book_name_to_find)
         if (book_N == None):
-            print("! referense not recognised, refs : {0} -> {1} ; ref {2}; book name {3}".format(inp_tag_text_src, refs, ref, book_name))
+            # Get surrounding context
+            parent = inp_tag.find_parent(['p', 'div', 'li', 'blockquote'])  # common block-level containers
+            context = parent.get_text(strip=True) if parent else ""
+
+            # Limit context length for readability
+            if len(context) > 300:
+                context = context[:300] + "..."
+
+            print("! Reference not recognised:")
+            print(f"  Tag text: {inp_tag_text_src}")
+            print(f"  Context (around the reference): {context}")
+            print(f"  All parsed refs: {refs}")
+            print(f"  Problematic ref: {ref}")
+            print(f"  Book name extracted: {book_name}")
             inp = ""
             while (not(inp == 'y' or inp == 'n')):
                 print("exit? (y/n)")

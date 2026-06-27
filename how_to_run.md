@@ -10,6 +10,9 @@ Lesson request
 https://sabbath-school.adventech.io/api/v1/ru/quarterlies/2020-01/lessons/01/days/01/read/index.json
 
 #How to run
+python3 -m venv myenv
+source myenv/bin/activate
+pip install bs4 regex requests
 cd ~/My_Designs/MyBible_SS/MyBible_SS_Python
 
 ./SDA_SS_to_MyBible_devotions.py --year 2020 --lang ru
