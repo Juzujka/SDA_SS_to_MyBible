@@ -78,7 +78,9 @@ class text_material:
 
         for attempt in range(1, max_retries + 1):
             try:
-                print(f"Fetching {request_str} (attempt {attempt}/{max_retries})")
+                if(attempt > 1) :
+                    #print(f"Fetching {request_str} (attempt {attempt}/{max_retries})")
+                    print(f"(attempt {attempt}/{max_retries})")
                 r = requests.get(request_str, timeout=timeout)
                 r.raise_for_status()  # raise HTTPError for bad status codes
                 break  # success, exit loop
@@ -1131,7 +1133,7 @@ def adventech_ref_to_MyBible_ref(lang_code, doc, inp_tag):
 
             # Limit context length for readability
             if len(context) > 300:
-                context = context[:300] + "..."
+                context = context[:280] + "..." + context[:20]
 
             print("! Reference not recognised:")
             print(f"  Tag text: {inp_tag_text_src}")

@@ -38,6 +38,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("К римлянам", "Рим.")
     inp_tag_text = inp_tag_text.replace("к римлянам", "Рим.")
     inp_tag_text = inp_tag_text.replace("к ефесянам", "Ефесянам")
+    inp_tag_text = inp_tag_text.replace("к галатам", "галатам")
     inp_tag_text = inp_tag_text.replace("Псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("псалмы", "Псалом")
     inp_tag_text = inp_tag_text.replace("Евангелие от", "")
