@@ -53,6 +53,7 @@ def ref_tag_preprocess(inp_tag_text):
     inp_tag_text = inp_tag_text.replace("главы", "")
     inp_tag_text = inp_tag_text.replace("Главы", "")
     inp_tag_text = inp_tag_text.replace("главы", "")
+    inp_tag_text = inp_tag_text.replace("и далее", "")
     inp_tag_text = inp_tag_text.replace("гл.", "")
     inp_tag_text = inp_tag_text.replace(" и ", "; ")
     inp_tag_text = inp_tag_text.replace("начало", "")

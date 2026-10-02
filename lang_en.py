@@ -165,6 +165,7 @@ book_index_to_MyBible = dict([\
 ('Amos',370),\
 ('Oba',380),\
 ('Obadiah',380),\
+('Obad',380),\
 ('Jon',390),\
 ('Jona',390),\
 ('Jonah',390),\
