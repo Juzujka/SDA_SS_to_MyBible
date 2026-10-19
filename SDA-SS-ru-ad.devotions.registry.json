@@ -1,7 +1,7 @@
 {
   "url": "https://raw.githubusercontent.com/Juzujka/SDA_SS_to_MyBible/master/SDA-SS-ru-ad.devotions.registry.json",
   "file_name": "SDA-SS-ru-ad.devotions.registry.json",
-  "description": "Sabath School Lessons of the SDA church, 2025",
+  "description": "Пособия по изучению Библии в Субботней школе церкви Христиан адвентистов седьмого дня для взрослых",
   "modules": [
     {
       "download_url": "https://github.com/Juzujka/SDA_SS_to_MyBible/raw/master/SS-ru-ad'22.devotions.SQLite3",
